@@ -29,6 +29,7 @@
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+  overflow-x: hidden;
 }
 
 body {
@@ -42,7 +43,7 @@ body {
 .container {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 0 50px;
+  padding: 0 clamp(25px, calc(25px + (100vw - 320px) * 0.02451), 50px);
   width: 100%;
 }
 
@@ -79,7 +80,7 @@ header {
   z-index: 100;
   display: flex;
   justify-content: center;
-  padding: 0 50px;
+  padding: 0 clamp(10px, calc(10px + (100vw - 320px) * 0.03922), 50px);
   pointer-events: none;
 }
 header::before {
@@ -101,7 +102,7 @@ header::before {
   align-items: center;
   justify-content: space-between;
   height: 58px;
-  padding: 0 14px 0 32px;
+  padding: 0 14px 0 clamp(14px, calc(14px + (100vw - 320px) * 0.017647), 32px);
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(14px);
   border: 1px solid var(--line);
@@ -109,9 +110,10 @@ header::before {
 }
 .logo {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 0.26em;
-  font-size: 19px;
+  gap: 0 0.26em;
+  font-size: clamp(13px, calc(13px + (100vw - 360px) * 0.006122), 19px);
   color: var(--ink);
 }
 .logo em {
@@ -127,15 +129,17 @@ header::before {
 }
 nav {
   display: flex;
-  gap: 8px;
-  font-size: 13.5px;
+  gap: clamp(0px, calc(0px + (100vw - 320px) * 0.007843), 8px);
+  font-size: clamp(10px, calc(10px + (100vw - 360px) * 0.003571), 13.5px);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 nav a {
-  padding: 9px 18px;
+  padding: clamp(5px, calc(5px + (100vw - 320px) * 0.003922), 9px)
+    clamp(5px, calc(5px + (100vw - 320px) * 0.012745), 18px);
   border-radius: 100px;
   color: var(--ink);
+  white-space: nowrap;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 nav a:hover,
@@ -150,12 +154,18 @@ footer {
   color: #f4f1ea;
   padding: 110px 0 40px;
 }
+footer .container {
+  display: flex;
+  flex-direction: column;
+  gap: 70px;
+}
 .ft-head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 40px;
-  margin-bottom: 100px;
+  gap: 15px 40px;
+  margin-bottom: 0;
 }
 .ft-label {
   font-size: 12px;
@@ -167,7 +177,7 @@ footer {
 .ft-cta {
   font-family: var(--sans);
   font-weight: 800;
-  font-size: clamp(44px, 5.6vw, 86px);
+  font-size: clamp(32px, calc(32px + (100vw - 360px) * 0.05510), 86px);
   line-height: 1.04;
   letter-spacing: -0.02em;
   text-transform: uppercase;
@@ -188,6 +198,9 @@ footer {
   justify-self: start;
   white-space: nowrap;
   transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.fl .f-en {
+  white-space: normal;
 }
 .fl .f-kr {
   font-family: var(--sans);
@@ -217,6 +230,7 @@ footer {
   border: 1px solid #f4f1ea;
   border-radius: 100px;
   padding: 16px 30px;
+  white-space: nowrap;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 .ft-mailbtn:hover {
@@ -225,6 +239,8 @@ footer {
 }
 .ft-bottom {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px 0;
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid #3a352d;
