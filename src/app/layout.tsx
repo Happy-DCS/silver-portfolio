@@ -23,7 +23,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className={`${instrumentSerif.variable} ${nanumMyeongjo.variable}`}>
+    <html
+      lang="ko"
+      className={`${instrumentSerif.variable} ${nanumMyeongjo.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <link
           rel="stylesheet"
@@ -32,6 +36,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body>
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }}
+        />
         <Header />
         {children}
       </body>
