@@ -30,7 +30,7 @@ export default function HomeHero() {
         heroBox.style.opacity = String(1 - p);
 
         const r = dv.getBoundingClientRect();
-        const g = Math.min(1, Math.max(0, (vh * 0.86 - r.top) / (vh * 0.62)));
+        const g = y === 0 ? 0 : Math.min(1, Math.max(0, (vh * 0.86 - r.top) / (vh * 0.62)));
         dvLine.style.transform = `scaleY(${g})`;
         dvCl.style.top = `${g * 100}%`;
         dvCl.style.transform = `translate(-50%, -50%) rotate(${g * 180}deg)`;
@@ -64,6 +64,7 @@ export default function HomeHero() {
               </span>{" "}
               TO MY
             </span>{" "}
+            <br />
             <em className="pf">portfolio</em>
           </h1>
         </div>

@@ -1,7 +1,14 @@
+import type { CSSProperties } from "react";
 import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
 import HomeHero from "@/components/HomeHero";
 import RevealObserver from "@/components/RevealObserver";
+
+// 320px(모바일 최소)~1340px(컨테이너 최대) 사이를 선형 보간해 마진을 유동적으로 줄인다.
+function fluidMargin(max: number, floor = Math.round(max * 0.3)) {
+  const coeff = (max - floor) / 1020;
+  return `clamp(${floor}px, calc(${floor}px + (100vw - 320px) * ${coeff.toFixed(5)}), ${max}px)`;
+}
 
 const COLLAGE = [
   {
@@ -67,7 +74,12 @@ export default function Home() {
               <a
                 key={item.p}
                 className="art"
-                style={{ gridColumn: item.gridColumn, marginTop: item.marginTop }}
+                style={
+                  {
+                    "--gc": item.gridColumn,
+                    "--mt": item.marginTop ? fluidMargin(item.marginTop) : "0px",
+                  } as CSSProperties
+                }
                 href={`/works/${item.p}`}
               >
                 <div className={`ph ${item.ratio}`} style={{ background: item.bg }}>
