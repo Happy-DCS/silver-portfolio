@@ -43,3 +43,6 @@ next-env.d.ts
 # agent instructions
 AGENTS.md
 CLAUDE.md
+
+# design handoff reference (not part of the shipped app)
+/design
