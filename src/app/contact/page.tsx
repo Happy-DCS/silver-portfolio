@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function ContactPage() {
   return (
     <main>
@@ -17,19 +19,19 @@ export default function ContactPage() {
           <a className="ig" href="#" target="_blank" rel="noopener">
             Instagram
             <span className="igc">
-              <img src="/assets/img/instagram.png" alt="" />
+              <Image src="/assets/img/instagram.png" alt="" fill sizes="24px" />
             </span>
           </a>
           <a className="be" href="#" target="_blank" rel="noopener">
             Behance
             <span className="igc">
-              <img src="/assets/img/behance.png" alt="" />
+              <Image src="/assets/img/behance.png" alt="" fill sizes="24px" />
             </span>
           </a>
           <a className="li" href="#" target="_blank" rel="noopener">
             LinkedIn
             <span className="igc">
-              <img src="/assets/img/linkedin.png" alt="" />
+              <Image src="/assets/img/linkedin.png" alt="" fill sizes="24px" />
             </span>
           </a>
           <a className="rs" href="#">
