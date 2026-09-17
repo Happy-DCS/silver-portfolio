@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Nanum_Myeongjo } from "next/font/google";
 import Header from "@/components/Header";
+import RevealObserver from "@/components/RevealObserver";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         <Header />
         {children}
+        <RevealObserver />
       </body>
     </html>
   );
