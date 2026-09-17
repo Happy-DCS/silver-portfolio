@@ -952,6 +952,149 @@ html.js .collage .art.in:hover {
   }
 }
 
+/* ---------- contact 페이지 (타이포 스택형) ---------- */
+main {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 72px 0 0;
+}
+.c-label {
+  font-size: clamp(20px, calc(20px + (100vw - 320px) * 0.09608), 118px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+.c-label b {
+  font-family: var(--sans);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.c-label em {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.mail {
+  font-family: var(--serif-en);
+  font-size: clamp(16px, calc(16px + (100vw - 320px) * 0.1), 118px);
+  line-height: 1.08;
+  text-decoration: none;
+  -webkit-text-stroke: 0 var(--ink);
+  transition: -webkit-text-stroke 0.25s ease;
+  word-break: break-all;
+}
+.mail:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.1em;
+  text-decoration-thickness: 0.035em;
+  -webkit-text-stroke: 0.022em var(--ink);
+}
+.c-sns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 0.45em;
+  font-size: clamp(20px, calc(20px + (100vw - 320px) * 0.09608), 118px);
+  line-height: 1.08;
+}
+.c-sns a {
+  transition: color 0.3s ease;
+}
+/* 인스타그램: 세리프 이탤릭 + 브랜드 그라데이션 + 아이콘 등장 (클로버와 동일 문법) */
+.c-sns .ig {
+  font-family: var(--serif-en);
+  font-style: italic;
+}
+.c-sns .ig:hover {
+  background: linear-gradient(45deg, #405de6, #833ab4, #c13584, #e1306c, #fd1d1d, #f77737, #fcaf45);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.igc {
+  display: inline-block;
+  width: 0;
+  height: 0.72em;
+  vertical-align: -0.02em;
+  transition: width 0.45s cubic-bezier(0.65, 0, 0.25, 1), margin 0.45s cubic-bezier(0.65, 0, 0.25, 1);
+}
+.igc img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.3s ease 0.1s, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+}
+.c-sns a:hover .igc {
+  width: 0.78em;
+  margin-left: 0.12em;
+}
+.c-sns a:hover .igc img {
+  opacity: 1;
+  transform: scale(1);
+}
+/* 비헨스·링크드인: 산세리프 + 브랜드 컬러 */
+.c-sns .be,
+.c-sns .li {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.c-sns .be:hover {
+  color: #1769ff;
+}
+.c-sns .li:hover {
+  color: #0a66c2;
+}
+/* Resume: 호버 시 검은 상자 + 이력서로 스왑 (영문 세리프 ↔ 한글 산세리프) */
+.c-sns .rs {
+  display: inline-grid;
+  padding: 0 0.14em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.rs > span {
+  grid-area: 1 / 1;
+  justify-self: center;
+  transition: opacity 0.3s ease;
+}
+.rs .r-en {
+  font-family: var(--serif-en);
+}
+.rs .r-kr {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: 0;
+  font-size: 0.82em;
+  align-self: center;
+  color: #fff;
+  opacity: 0;
+}
+.rs:hover {
+  background: var(--ink);
+}
+.rs:hover .r-en {
+  opacity: 0;
+}
+.rs:hover .r-kr {
+  opacity: 1;
+}
+
+@media (max-width: 575px) {
+  .c-sns {
+    column-gap: 0.3em;
+    row-gap: 0.2em;
+  }
+}
+
 /* ---------- TOP 버튼 ---------- */
 .top-btn {
   position: fixed;
