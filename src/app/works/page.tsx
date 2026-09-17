@@ -1,14 +1,25 @@
 import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
+import WorksGrid from "@/components/WorksGrid";
 
 export default function WorksPage() {
   return (
     <>
-      <main style={{ paddingTop: "72px", minHeight: "60vh" }}>
-        <div className="container" style={{ padding: "160px 50px" }}>
-          <p>전체 작업 아카이브는 다음 단계에서 이식합니다.</p>
-        </div>
-      </main>
+      <div className="container page-head">
+        <h1>
+          <span className="line1">
+            <span className="l-en">
+              ALL <em>works</em>
+            </span>
+            <span className="l-kr">
+              <span className="oj">모든</span> 작업들
+            </span>
+          </span>
+        </h1>
+      </div>
+
+      <WorksGrid />
+
       <Footer />
       <TopButton />
     </>

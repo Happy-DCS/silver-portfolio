@@ -600,6 +600,166 @@ html.js .collage .art.in:hover {
   }
 }
 
+/* ---------- works 페이지 ---------- */
+.page-head {
+  padding-top: 200px;
+  padding-bottom: 50px;
+}
+.page-head h1 {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: clamp(32px, calc(32px + (100vw - 320px) * 0.08776), 118px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+.page-head h1 em {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1.05em;
+}
+.page-head .kr {
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  margin-top: 14px;
+  display: block;
+}
+
+/* 필터 바 */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.filters button {
+  font-family: var(--sans);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 9px 20px;
+  color: var(--ink);
+  transition: 0.25s;
+}
+.filters button i {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 6px;
+  transition: 0.25s;
+}
+.filters .bw {
+  display: inline-grid;
+  vertical-align: top;
+}
+.filters .bw > span {
+  grid-area: 1 / 1;
+  justify-self: center;
+  white-space: nowrap;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.filters .bw .b-kr {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.filters button:hover .b-en {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+.filters button:hover .b-kr {
+  opacity: 1;
+  transform: none;
+}
+.filters button:hover {
+  border-color: var(--ink);
+}
+.filters button.on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.filters button.on i {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* 카드 그리드 — 자유 배치(마소너리) */
+.grid {
+  columns: 3;
+  column-gap: 36px;
+  padding: 56px 0 130px;
+}
+.card {
+  break-inside: avoid;
+  margin-bottom: 52px;
+  display: block;
+}
+.card .ph {
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 18px;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.card:hover .ph {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 50px rgba(30, 27, 22, 0.18);
+}
+.card .ph em {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.card .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 14px;
+}
+.card .t-kr {
+  font-family: var(--serif-kr);
+  font-weight: 700;
+  font-size: 20px;
+  transition: color 0.3s;
+}
+.card:hover .t-kr {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.card .cat {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.card .yr {
+  font-size: 12px;
+  color: var(--muted);
+}
+#empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 80px 0 140px;
+  font-size: 15px;
+}
+
+@media (max-width: 700px) {
+  .grid {
+    columns: 1;
+  }
+}
+
 /* ---------- TOP 버튼 ---------- */
 .top-btn {
   position: fixed;
