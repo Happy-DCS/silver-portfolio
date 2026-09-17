@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
 import HomeHero from "@/components/HomeHero";
-import RevealObserver from "@/components/RevealObserver";
 
 // 320px(모바일 최소)~1340px(컨테이너 최대) 사이를 선형 보간해 마진을 유동적으로 줄인다.
 function fluidMargin(max: number, floor = Math.round(max * 0.3)) {
@@ -105,7 +104,6 @@ export default function Home() {
 
       <Footer />
       <TopButton />
-      <RevealObserver />
     </>
   );
 }
