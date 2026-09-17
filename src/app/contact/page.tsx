@@ -28,16 +28,18 @@ export default function ContactPage() {
               <Image src="/assets/img/behance.png" alt="" fill sizes="24px" />
             </span>
           </a>
-          <a className="li" href="#" target="_blank" rel="noopener">
-            LinkedIn
-            <span className="igc">
-              <Image src="/assets/img/linkedin.png" alt="" fill sizes="24px" />
-            </span>
-          </a>
-          <a className="rs" href="#">
-            <span className="r-en">Resume</span>
-            <span className="r-kr">이력서</span>
-          </a>
+          <div className="sns-row">
+            <a className="li" href="#" target="_blank" rel="noopener">
+              LinkedIn
+              <span className="igc">
+                <Image src="/assets/img/linkedin.png" alt="" fill sizes="24px" />
+              </span>
+            </a>
+            <a className="rs" href="#">
+              <span className="r-en">Resume</span>
+              <span className="r-kr">이력서</span>
+            </a>
+          </div>
         </div>
       </div>
     </main>

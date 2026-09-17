@@ -964,7 +964,7 @@ main {
   padding: 72px 0 0;
 }
 .c-label {
-  font-size: clamp(20px, calc(20px + (100vw - 320px) * 0.09608), 118px);
+  font-size: clamp(25px, calc(25px + (100vw - 320px) * 0.091176), 118px);
   line-height: 1.08;
   letter-spacing: -0.03em;
 }
@@ -981,7 +981,7 @@ main {
 }
 .mail {
   font-family: var(--serif-en);
-  font-size: clamp(16px, calc(16px + (100vw - 320px) * 0.1), 118px);
+  font-size: clamp(20px, calc(20px + (100vw - 320px) * 0.096078), 118px);
   line-height: 1.08;
   text-decoration: none;
   -webkit-text-stroke: 0 var(--ink);
@@ -1000,7 +1000,8 @@ main {
   justify-content: center;
   align-items: baseline;
   column-gap: 0.45em;
-  font-size: clamp(20px, calc(20px + (100vw - 320px) * 0.09608), 118px);
+  row-gap: 0.2em;
+  font-size: clamp(25px, calc(25px + (100vw - 320px) * 0.091176), 118px);
   line-height: 1.08;
 }
 .c-sns a {
@@ -1049,6 +1050,14 @@ main {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
+/* LinkedIn·Resume을 한 그룹으로 묶어 항상 다음 줄로 */
+.c-sns .sns-row {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 0.45em;
+}
 .c-sns .be:hover {
   color: #1769ff;
 }
@@ -1093,6 +1102,9 @@ main {
   .c-sns {
     column-gap: 0.3em;
     row-gap: 0.2em;
+  }
+  .c-sns .sns-row {
+    column-gap: 0.3em;
   }
 }
 
