@@ -48,7 +48,7 @@ export default function WorkPdfViewer({ pdfPath, hasPdf }: { pdfPath: string; ha
       .getDocument(pdfPath)
       .promise.then(async (pdf) => {
         const cw = pagesBox.clientWidth;
-        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        const dpr = Math.min(3, window.devicePixelRatio || 1);
         for (let i = 1; i <= pdf.numPages; i++) {
           if (cancelled) return;
           const page = await pdf.getPage(i);
