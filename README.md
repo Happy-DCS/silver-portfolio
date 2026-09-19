@@ -1,19 +1,28 @@
 # silver-portfolio
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Monorepo (npm workspaces):
+
+- `apps/web` — the [Next.js](https://nextjs.org) portfolio site + `/admin`, bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+- `apps/api` — NestJS backend API (DB access, admin write operations).
 
 ## Getting Started
 
-First, run the development server:
+Install once from the repo root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+```
+
+Run the frontend:
+
+```bash
+npm run dev --workspace apps/web
+```
+
+Run the backend:
+
+```bash
+npm run start:dev --workspace apps/api
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
