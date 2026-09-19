@@ -11,6 +11,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
 
   return (
     <header>
@@ -19,13 +20,15 @@ export default function Header() {
           <em>Silver</em>
           <b>EUN CHO</b>
         </Link>
-        <nav>
-          {NAV_LINKS.map(({ href, label }) => (
-            <Link key={href} href={href} className={pathname === href ? "on" : undefined}>
-              {label}
-            </Link>
-          ))}
-        </nav>
+        {!isAdmin && (
+          <nav>
+            {NAV_LINKS.map(({ href, label }) => (
+              <Link key={href} href={href} className={pathname === href ? "on" : undefined}>
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
       </div>
     </header>
   );
