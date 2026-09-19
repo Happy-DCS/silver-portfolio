@@ -46,3 +46,6 @@ CLAUDE.md
 
 # design handoff reference (not part of the shipped app)
 /design
+
+# test/local PDF assets (added ad-hoc, not committed)
+*.pdf
