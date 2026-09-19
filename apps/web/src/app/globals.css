@@ -1280,6 +1280,209 @@ main {
   }
 }
 
+/* ---------- admin 페이지 ---------- */
+.admin-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 160px 0 100px;
+}
+.admin-login {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.admin-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.admin-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.admin-eyebrow {
+  font-size: clamp(10px, calc(10px + (100vw - 320px) * 0.001786), 12px);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.admin-title {
+  font-family: var(--serif-kr);
+  font-weight: 800;
+  font-size: clamp(26px, calc(26px + (100vw - 320px) * 0.02059), 40px);
+  letter-spacing: -0.02em;
+  margin-top: -4px;
+}
+.admin-desc {
+  color: var(--muted);
+  font-size: 14px;
+}
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.admin-field label {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.admin-field input {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 2px;
+  transition: border-color 0.25s ease;
+}
+.admin-field input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.admin-error {
+  font-size: 13px;
+  color: #b3312c;
+}
+.admin-submit {
+  align-self: flex-start;
+  margin-top: 8px;
+  font-size: clamp(11px, calc(11px + (100vw - 320px) * 0.001786), 13px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: clamp(10px, calc(10px + (100vw - 320px) * 0.001786), 12px)
+    clamp(22px, calc(22px + (100vw - 320px) * 0.007143), 30px);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+}
+.admin-submit:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.admin-submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-top: 65px;
+}
+.admin-section-block {
+  display: flex;
+  flex-direction: column;
+}
+.admin-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.admin-section-head h2 {
+  font-family: var(--serif-kr);
+  font-weight: 700;
+  font-size: clamp(18px, calc(18px + (100vw - 320px) * 0.00722), 24px);
+}
+.admin-count {
+  font-size: clamp(12px, calc(12px + (100vw - 320px) * 0.00361), 15px);
+  color: var(--muted);
+}
+.admin-add-btn {
+  margin-left: auto;
+  align-self: center;
+  margin-top: 0;
+}
+.admin-list {
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.admin-list-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.admin-list-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.admin-list-title {
+  font-family: var(--serif-kr);
+  font-weight: 700;
+  font-size: clamp(15px, calc(15px + (100vw - 320px) * 0.00481), 19px);
+}
+.admin-list-sub {
+  font-size: clamp(12.5px, calc(12.5px + (100vw - 320px) * 0.00301), 15px);
+  color: var(--muted);
+}
+.admin-list-cat {
+  font-size: clamp(11.5px, calc(11.5px + (100vw - 320px) * 0.00241), 13.5px);
+  letter-spacing: 0.04em;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 4px 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.admin-list-btn {
+  align-self: center;
+  margin-top: 0;
+  padding: 8px 18px;
+}
+.admin-remove-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  padding-top: 2px;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.admin-remove-btn:hover {
+  background: var(--ink);
+  color: #fff;
+}
+.admin-remove-btn--locked {
+  color: var(--line);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.admin-remove-btn--locked::after {
+  content: "×";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+}
+
 /* ---------- TOP 버튼 ---------- */
 .top-btn {
   position: fixed;
