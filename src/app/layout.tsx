@@ -27,6 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ko"
       className={`${instrumentSerif.variable} ${nanumMyeongjo.variable}`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
