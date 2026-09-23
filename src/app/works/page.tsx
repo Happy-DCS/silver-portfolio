@@ -3,6 +3,8 @@ import TopButton from "@/components/TopButton";
 import WorksGrid from "@/components/WorksGrid";
 import { getWorks } from "@/lib/getWorks";
 
+export const dynamic = "force-dynamic";
+
 export default async function WorksPage() {
   const works = await getWorks();
 

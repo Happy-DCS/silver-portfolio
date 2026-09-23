@@ -692,15 +692,21 @@ html.js .collage .art.in:hover {
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* 카드 그리드 — 자유 배치(마소너리) */
+/* 카드 그리드 — 3열에 i%3으로 순서대로 분배 (최신순 층층이 쌓기) */
 .grid {
-  columns: 3;
-  column-gap: 36px;
+  display: flex;
+  align-items: flex-start;
+  gap: 36px;
   padding: 56px 0 130px;
 }
+.grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+  flex: 1;
+  min-width: 0;
+}
 .card {
-  break-inside: avoid;
-  margin-bottom: 52px;
   display: block;
 }
 .card .ph {
@@ -755,11 +761,6 @@ html.js .collage .art.in:hover {
   font-size: 15px;
 }
 
-@media (max-width: 575px) {
-  .grid {
-    columns: 1;
-  }
-}
 
 /* ---------- about 페이지 ---------- */
 .intro {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { WorkListItem } from "@/lib/getWorks";
 import { formatCategories } from "@/lib/categoryLabels";
 
@@ -23,10 +23,25 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   web: "linear-gradient(135deg,#28607a,#a8d8e8)",
 };
 const DEFAULT_GRADIENT = "linear-gradient(135deg,#8d9198,#e6e8ec)";
+const DESKTOP_COLUMN_COUNT = 3;
+const MOBILE_BREAKPOINT = "(max-width: 575px)";
 
 export default function WorksGrid({ works }: { works: WorkListItem[] }) {
   const [active, setActive] = useState<string>("all");
+  const [columnCount, setColumnCount] = useState(DESKTOP_COLUMN_COUNT);
+
+  useEffect(() => {
+    const mql = window.matchMedia(MOBILE_BREAKPOINT);
+    const update = () => setColumnCount(mql.matches ? 1 : DESKTOP_COLUMN_COUNT);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+
   const visible = active === "all" ? works : works.filter((w) => w.categories.includes(active));
+
+  const columns: WorkListItem[][] = Array.from({ length: columnCount }, () => []);
+  visible.forEach((w, i) => columns[i % columnCount].push(w));
 
   return (
     <div className="container">
@@ -43,20 +58,27 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
       </div>
 
       <div className="grid">
-        {visible.map((w) => (
-          <a key={w.id} className="card" href={`/works/${w.id}`}>
-            <div
-              className="ph"
-              style={{ aspectRatio: w.ratio, background: CATEGORY_GRADIENTS[w.categories[0]] ?? DEFAULT_GRADIENT }}
-            >
-              <em>{w.titleEn}</em>
-            </div>
-            <div className="meta">
-              <span className="t-kr">{w.titleKr}</span>
-              <span className="yr">{w.year}</span>
-            </div>
-            <span className="cat">{formatCategories(w.categories)}</span>
-          </a>
+        {columns.map((col, ci) => (
+          <div className="grid-col" key={ci}>
+            {col.map((w) => (
+              <a key={w.id} className="card" href={`/works/${w.id}`}>
+                <div
+                  className="ph"
+                  style={{
+                    aspectRatio: w.ratio,
+                    background: CATEGORY_GRADIENTS[w.categories[0]] ?? DEFAULT_GRADIENT,
+                  }}
+                >
+                  <em>{w.titleEn}</em>
+                </div>
+                <div className="meta">
+                  <span className="t-kr">{w.titleKr}</span>
+                  <span className="yr">{w.year}</span>
+                </div>
+                <span className="cat">{formatCategories(w.categories)}</span>
+              </a>
+            ))}
+          </div>
         ))}
       </div>
       {visible.length === 0 && <p id="empty">이 분야의 작업은 준비 중입니다 🌱</p>}

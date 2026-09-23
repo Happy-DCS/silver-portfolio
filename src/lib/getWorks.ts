@@ -14,7 +14,8 @@ export async function getWorks(): Promise<WorkListItem[]> {
   const { data, error } = await supabaseAdmin
     .from("works")
     .select("id, title_kr, title_en, worked_at, category, work_pdfs(ratio)")
-    .order("id");
+    .order("worked_at", { ascending: false })
+    .order("id", { ascending: false });
 
   if (error) throw error;
 
