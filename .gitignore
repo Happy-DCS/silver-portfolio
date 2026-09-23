@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies (any app/package under apps/* or packages/*)
+# dependencies
 node_modules/
 .pnp
 .pnp.*
@@ -16,9 +16,6 @@ coverage/
 # next.js
 .next/
 out/
-
-# nest.js / other backend builds
-dist/
 
 # misc
 .DS_Store
