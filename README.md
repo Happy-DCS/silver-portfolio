@@ -1,28 +1,12 @@
 # silver-portfolio
 
-Monorepo (npm workspaces):
-
-- `apps/web` — the [Next.js](https://nextjs.org) portfolio site + `/admin`, bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-- `apps/api` — NestJS backend API (DB access, admin write operations).
+The [Next.js](https://nextjs.org) portfolio site + `/admin`, bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). DB/storage access (Supabase) is handled directly from Next.js Server Components and API routes — no separate backend service.
 
 ## Getting Started
 
-Install once from the repo root:
-
 ```bash
 npm install
-```
-
-Run the frontend:
-
-```bash
-npm run dev --workspace apps/web
-```
-
-Run the backend:
-
-```bash
-npm run start:dev --workspace apps/api
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

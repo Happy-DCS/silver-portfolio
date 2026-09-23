@@ -1,8 +1,11 @@
 import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
 import WorksGrid from "@/components/WorksGrid";
+import { getWorks } from "@/lib/getWorks";
 
-export default function WorksPage() {
+export default async function WorksPage() {
+  const works = await getWorks();
+
   return (
     <>
       <div className="container page-head">
@@ -18,7 +21,7 @@ export default function WorksPage() {
         </h1>
       </div>
 
-      <WorksGrid />
+      <WorksGrid works={works} />
 
       <Footer />
       <TopButton />
