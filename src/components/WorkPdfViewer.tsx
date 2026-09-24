@@ -2,31 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
-
-const PDFJS_VERSION = "3.11.174";
-
-type PdfJsLib = {
-  GlobalWorkerOptions: { workerSrc: string };
-  getDocument: (path: string) => { promise: Promise<PdfDocument> };
-};
-
-type PdfDocument = {
-  numPages: number;
-  getPage: (n: number) => Promise<PdfPage>;
-};
-
-type PdfPage = {
-  getViewport: (opts: { scale: number }) => { width: number; height: number };
-  render: (opts: { canvasContext: CanvasRenderingContext2D; viewport: unknown }) => {
-    promise: Promise<void>;
-  };
-};
-
-declare global {
-  interface Window {
-    pdfjsLib?: PdfJsLib;
-  }
-}
+import { PDFJS_VERSION } from "@/lib/pdfjs";
 
 type Status = "loading" | "rendered" | "error";
 

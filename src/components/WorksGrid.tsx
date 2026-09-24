@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { WorkListItem } from "@/lib/getWorks";
 import { formatCategories } from "@/lib/categoryLabels";
+import WorkThumbnail from "@/components/WorkThumbnail";
 
 const FILTERS = [
   { f: "all", en: "All", kr: "전체" },
@@ -23,6 +24,17 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   web: "linear-gradient(135deg,#28607a,#a8d8e8)",
 };
 const DEFAULT_GRADIENT = "linear-gradient(135deg,#8d9198,#e6e8ec)";
+
+const CATEGORY_ACCENT: Record<string, string> = {
+  branding: "#c9541e",
+  graphic: "#2f7d43",
+  book: "#2b3a67",
+  uiux: "#584a8f",
+  product: "#8d9198",
+  motion: "#1f2d24",
+  web: "#28607a",
+};
+const DEFAULT_ACCENT = "#8d9198";
 
 export default function WorksGrid({ works }: { works: WorkListItem[] }) {
   const [active, setActive] = useState<string>("all");
@@ -45,11 +57,13 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
       <div className="grid">
         {visible.map((w) => (
           <a key={w.id} className="card" href={`/works/${w.id}`}>
-            <div
-              className="ph"
-              style={{ aspectRatio: w.ratio, background: CATEGORY_GRADIENTS[w.categories[0]] ?? DEFAULT_GRADIENT }}
-            >
-              <em>{w.titleEn}</em>
+            <div className="ph" style={{ aspectRatio: w.ratio }}>
+              <WorkThumbnail
+                pdfUrl={w.pdfUrl}
+                fallbackBg={CATEGORY_GRADIENTS[w.categories[0]] ?? DEFAULT_GRADIENT}
+                accentColor={CATEGORY_ACCENT[w.categories[0]] ?? DEFAULT_ACCENT}
+                label={w.titleEn}
+              />
             </div>
             <div className="meta">
               <span className="t-kr">{w.titleKr}</span>

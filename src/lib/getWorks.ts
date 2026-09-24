@@ -8,12 +8,13 @@ export type WorkListItem = {
   year: number;
   categories: string[];
   ratio: number;
+  pdfUrl: string | null;
 };
 
 export async function getWorks(): Promise<WorkListItem[]> {
   const { data, error } = await supabaseAdmin
     .from("works")
-    .select("id, title_kr, title_en, worked_at, category, work_pdfs(ratio)")
+    .select("id, title_kr, title_en, worked_at, category, work_pdfs(ratio, pdf_url)")
     .order("id");
 
   if (error) throw error;
@@ -27,6 +28,7 @@ export async function getWorks(): Promise<WorkListItem[]> {
       year: w.worked_at,
       categories: w.category ?? [],
       ratio: pdf?.ratio ?? 1,
+      pdfUrl: pdf?.pdf_url ?? null,
     };
   });
 }
