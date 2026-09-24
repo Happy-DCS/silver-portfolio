@@ -1174,7 +1174,6 @@ main {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 34px;
-  font-size: 13.5px;
   letter-spacing: 0.04em;
 }
 .wk-tags {
@@ -1183,6 +1182,7 @@ main {
   gap: 10px;
 }
 .wk-meta span {
+  font-size: clamp(13.5px, calc(13.5px + (100vw - 320px) * 0.00223), 16px);
   border: 1px solid var(--line);
   border-radius: 100px;
   padding: 8px 18px;
