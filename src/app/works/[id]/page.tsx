@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
@@ -45,7 +46,7 @@ export default async function WorkDetailPage({ params }: PageProps<"/works/[id]"
           </div>
           {work.pdfUrl && (
             <a className="wk-download" href={work.pdfUrl} download target="_blank" rel="noopener">
-              PDF 다운로드
+              <Image src="/assets/img/download.png" alt="PDF 다운로드" width={18} height={18} />
             </a>
           )}
         </div>
