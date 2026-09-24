@@ -1180,6 +1180,8 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
 }
 .wk-meta span {
   font-size: clamp(13.5px, calc(13.5px + (100vw - 320px) * 0.00223), 16px);
@@ -1188,6 +1190,8 @@ main {
   padding: clamp(6px, calc(6px + (100vw - 320px) * 0.001786), 8px)
     clamp(14px, calc(14px + (100vw - 320px) * 0.003571), 18px);
   color: var(--ink);
+  max-width: 100%;
+  overflow-wrap: break-word;
 }
 .wk-download {
   flex-shrink: 0;
