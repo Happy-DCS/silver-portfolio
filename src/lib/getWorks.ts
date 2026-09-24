@@ -22,6 +22,18 @@ async function getCategoryMap(): Promise<Map<number, WorkCategory>> {
   return new Map((data ?? []).map((c) => [c.id, { slug: c.slug, label: c.label_en }]));
 }
 
+export type Category = {
+  slug: string;
+  labelKr: string;
+  labelEn: string;
+};
+
+export async function getCategories(): Promise<Category[]> {
+  const { data, error } = await supabaseAdmin.from("categories").select("slug, label_kr, label_en").order("id");
+  if (error) throw error;
+  return (data ?? []).map((c) => ({ slug: c.slug, labelKr: c.label_kr, labelEn: c.label_en }));
+}
+
 function resolveCategories(categoryIds: number[] | null | undefined, catMap: Map<number, WorkCategory>): WorkCategory[] {
   return (categoryIds ?? [])
     .map((id) => catMap.get(id))

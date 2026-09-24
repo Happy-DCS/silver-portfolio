@@ -1,28 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import type { WorkListItem } from "@/lib/getWorks";
+import type { Category, WorkListItem } from "@/lib/getWorks";
 import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
 import WorkThumbnail from "@/components/WorkThumbnail";
 
-const FILTERS = [
-  { f: "all", en: "All", kr: "전체" },
-  { f: "branding", en: "Branding", kr: "브랜딩" },
-  { f: "graphic", en: "Graphic·Poster", kr: "그래픽·포스터" },
-  { f: "book", en: "Book·Editorial", kr: "북·편집" },
-  { f: "uiux", en: "UI/UX", kr: "UI/UX" },
-  { f: "product", en: "Product", kr: "제품" },
-] as const;
-
-export default function WorksGrid({ works }: { works: WorkListItem[] }) {
+export default function WorksGrid({ works, categories }: { works: WorkListItem[]; categories: Category[] }) {
   const [active, setActive] = useState<string>("all");
   const hasCategory = (w: WorkListItem, slug: string) => w.categories.some((c) => c.slug === slug);
   const visible = active === "all" ? works : works.filter((w) => hasCategory(w, active));
 
+  const filters = [
+    { f: "all", en: "All", kr: "전체" },
+    ...categories.map((c) => ({ f: c.slug, en: c.labelEn, kr: c.labelKr })),
+  ];
+
   return (
     <div className="container">
       <div className="filters">
-        {FILTERS.map(({ f, en, kr }) => (
+        {filters.map(({ f, en, kr }) => (
           <button key={f} className={active === f ? "on" : undefined} onClick={() => setActive(f)}>
             <span className="bw">
               <span className="b-en">{en}</span>
