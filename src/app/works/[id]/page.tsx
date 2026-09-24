@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
 import WorkPdfViewer from "@/components/WorkPdfViewer";
 import { getWorkById, getWorks } from "@/lib/getWorks";
-import { formatCategories } from "@/lib/categoryLabels";
 
 export async function generateStaticParams() {
   const works = await getWorks();
@@ -41,7 +40,7 @@ export default async function WorkDetailPage({ params }: PageProps<"/works/[id]"
         <span className="en">{work.titleEn}</span>
         <div className="wk-meta">
           <span>{work.year}</span>
-          <span>{formatCategories(work.categories)}</span>
+          <span>{work.categories.map((c) => c.label).join(" · ")}</span>
         </div>
       </div>
 

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { WorkListItem } from "@/lib/getWorks";
-import { formatCategories } from "@/lib/categoryLabels";
 import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
 import WorkThumbnail from "@/components/WorkThumbnail";
 
@@ -17,7 +16,8 @@ const FILTERS = [
 
 export default function WorksGrid({ works }: { works: WorkListItem[] }) {
   const [active, setActive] = useState<string>("all");
-  const visible = active === "all" ? works : works.filter((w) => w.categories.includes(active));
+  const hasCategory = (w: WorkListItem, slug: string) => w.categories.some((c) => c.slug === slug);
+  const visible = active === "all" ? works : works.filter((w) => hasCategory(w, active));
 
   return (
     <div className="container">
@@ -28,7 +28,7 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
               <span className="b-en">{en}</span>
               <span className="b-kr">{kr}</span>
             </span>{" "}
-            <i>{f === "all" ? works.length : works.filter((w) => w.categories.includes(f)).length}</i>
+            <i>{f === "all" ? works.length : works.filter((w) => hasCategory(w, f)).length}</i>
           </button>
         ))}
       </div>
@@ -39,8 +39,8 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
             <div className="ph" style={{ aspectRatio: w.ratio }}>
               <WorkThumbnail
                 pdfUrl={w.pdfUrl}
-                fallbackBg={categoryGradient(w.categories[0])}
-                accentColor={categoryAccent(w.categories[0])}
+                fallbackBg={categoryGradient(w.categories[0]?.slug)}
+                accentColor={categoryAccent(w.categories[0]?.slug)}
                 label={w.titleEn}
               />
             </div>
@@ -48,7 +48,7 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
               <span className="t-kr">{w.titleKr}</span>
               <span className="yr">{w.year}</span>
             </div>
-            <span className="cat">{formatCategories(w.categories)}</span>
+            <span className="cat">{w.categories.map((c) => c.label).join(" · ")}</span>
           </a>
         ))}
       </div>

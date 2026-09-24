@@ -1,20 +1,37 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
+export type WorkCategory = {
+  slug: string;
+  label: string;
+};
+
 export type WorkListItem = {
   id: number;
   titleKr: string;
   titleEn: string;
   year: number;
-  categories: string[];
+  categories: WorkCategory[];
   ratio: number;
   pdfUrl: string | null;
 };
 
+type CategoryRow = { slug: string; label_en: string };
+type CategoryRef = CategoryRow | CategoryRow[] | null;
+
+function extractCategories(workCategories: { categories: CategoryRef }[] | null | undefined): WorkCategory[] {
+  return (workCategories ?? [])
+    .map((wc) => (Array.isArray(wc.categories) ? wc.categories[0] : wc.categories))
+    .filter((c): c is CategoryRow => Boolean(c))
+    .map((c) => ({ slug: c.slug, label: c.label_en }));
+}
+
 export async function getWorks(): Promise<WorkListItem[]> {
   const { data, error } = await supabaseAdmin
     .from("works")
-    .select("id, title_kr, title_en, worked_at, category, work_pdfs(ratio, pdf_url)")
+    .select(
+      "id, title_kr, title_en, worked_at, work_categories(categories(slug, label_en)), work_pdfs(ratio, pdf_url)"
+    )
     .order("id");
 
   if (error) throw error;
@@ -26,7 +43,7 @@ export async function getWorks(): Promise<WorkListItem[]> {
       titleKr: w.title_kr,
       titleEn: w.title_en,
       year: w.worked_at,
-      categories: w.category ?? [],
+      categories: extractCategories(w.work_categories),
       ratio: pdf?.ratio ?? 1,
       pdfUrl: pdf?.pdf_url ?? null,
     };
@@ -38,14 +55,16 @@ export type WorkDetail = {
   titleKr: string;
   titleEn: string;
   year: number;
-  categories: string[];
+  categories: WorkCategory[];
   pdfUrl: string | null;
 };
 
 export async function getWorkById(id: number): Promise<WorkDetail | null> {
   const { data, error } = await supabaseAdmin
     .from("works")
-    .select("id, title_kr, title_en, worked_at, category, work_pdfs(pdf_url)")
+    .select(
+      "id, title_kr, title_en, worked_at, work_categories(categories(slug, label_en)), work_pdfs(pdf_url)"
+    )
     .eq("id", id)
     .maybeSingle();
 
@@ -58,7 +77,7 @@ export async function getWorkById(id: number): Promise<WorkDetail | null> {
     titleKr: data.title_kr,
     titleEn: data.title_en,
     year: data.worked_at,
-    categories: data.category ?? [],
+    categories: extractCategories(data.work_categories),
     pdfUrl: pdf?.pdf_url ?? null,
   };
 }
