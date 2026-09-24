@@ -1169,17 +1169,41 @@ main {
 }
 .wk-meta {
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
   margin-top: 34px;
   font-size: 13.5px;
   letter-spacing: 0.04em;
+}
+.wk-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 .wk-meta span {
   border: 1px solid var(--line);
   border-radius: 100px;
   padding: 8px 18px;
   color: var(--ink);
+}
+.wk-download {
+  font-size: clamp(11px, calc(11px + (100vw - 320px) * 0.001786), 13px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: clamp(8px, calc(8px + (100vw - 320px) * 0.001786), 10px)
+    clamp(14px, calc(14px + (100vw - 320px) * 0.007143), 22px);
+  color: var(--ink);
+  white-space: nowrap;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+.wk-download:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
 }
 
 /* PDF 뷰어 */

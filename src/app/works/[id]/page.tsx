@@ -39,8 +39,15 @@ export default async function WorkDetailPage({ params }: PageProps<"/works/[id]"
         <h1>{work.titleKr}</h1>
         <span className="en">{work.titleEn}</span>
         <div className="wk-meta">
-          <span>{work.year}</span>
-          <span>{work.categories.map((c) => c.label).join(" · ")}</span>
+          <div className="wk-tags">
+            <span>{work.year}</span>
+            <span>{work.categories.map((c) => c.label).join(" · ")}</span>
+          </div>
+          {work.pdfUrl && (
+            <a className="wk-download" href={work.pdfUrl} download target="_blank" rel="noopener">
+              PDF 다운로드
+            </a>
+          )}
         </div>
       </div>
 
