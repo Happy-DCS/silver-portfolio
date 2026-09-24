@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { WorkListItem } from "@/lib/getWorks";
 import { formatCategories } from "@/lib/categoryLabels";
+import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
 import WorkThumbnail from "@/components/WorkThumbnail";
 
 const FILTERS = [
@@ -13,28 +14,6 @@ const FILTERS = [
   { f: "uiux", en: "UI/UX", kr: "UI/UX" },
   { f: "product", en: "Product", kr: "제품" },
 ] as const;
-
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  branding: "linear-gradient(135deg,#c9541e,#f3d34a)",
-  graphic: "linear-gradient(135deg,#2f7d43,#cfe3a8)",
-  book: "linear-gradient(135deg,#2b3a67,#8ea7d9)",
-  uiux: "linear-gradient(135deg,#584a8f,#e3b8d5)",
-  product: "linear-gradient(135deg,#8d9198,#e6e8ec)",
-  motion: "linear-gradient(135deg,#1f2d24,#6fbf8a)",
-  web: "linear-gradient(135deg,#28607a,#a8d8e8)",
-};
-const DEFAULT_GRADIENT = "linear-gradient(135deg,#8d9198,#e6e8ec)";
-
-const CATEGORY_ACCENT: Record<string, string> = {
-  branding: "#c9541e",
-  graphic: "#2f7d43",
-  book: "#2b3a67",
-  uiux: "#584a8f",
-  product: "#8d9198",
-  motion: "#1f2d24",
-  web: "#28607a",
-};
-const DEFAULT_ACCENT = "#8d9198";
 
 export default function WorksGrid({ works }: { works: WorkListItem[] }) {
   const [active, setActive] = useState<string>("all");
@@ -60,8 +39,8 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
             <div className="ph" style={{ aspectRatio: w.ratio }}>
               <WorkThumbnail
                 pdfUrl={w.pdfUrl}
-                fallbackBg={CATEGORY_GRADIENTS[w.categories[0]] ?? DEFAULT_GRADIENT}
-                accentColor={CATEGORY_ACCENT[w.categories[0]] ?? DEFAULT_ACCENT}
+                fallbackBg={categoryGradient(w.categories[0])}
+                accentColor={categoryAccent(w.categories[0])}
                 label={w.titleEn}
               />
             </div>
