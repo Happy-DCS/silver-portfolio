@@ -1191,14 +1191,18 @@ main {
 }
 .wk-download {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: clamp(36px, calc(36px + (100vw - 320px) * 0.00714), 44px);
+  height: clamp(36px, calc(36px + (100vw - 320px) * 0.00714), 44px);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--line);
   border-radius: 100px;
   transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+.wk-download img {
+  width: clamp(16px, calc(16px + (100vw - 320px) * 0.00357), 20px);
+  height: clamp(16px, calc(16px + (100vw - 320px) * 0.00357), 20px);
 }
 .wk-download:hover {
   background: var(--line);

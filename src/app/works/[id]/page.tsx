@@ -46,7 +46,7 @@ export default async function WorkDetailPage({ params }: PageProps<"/works/[id]"
           </div>
           {work.pdfUrl && (
             <a className="wk-download" href={work.pdfUrl} download target="_blank" rel="noopener">
-              <Image src="/assets/img/download.png" alt="PDF 다운로드" width={18} height={18} />
+              <Image src="/assets/img/download.png" alt="PDF 다운로드" width={20} height={20} />
             </a>
           )}
         </div>
