@@ -22,16 +22,48 @@ async function getCategoryMap(): Promise<Map<number, WorkCategory>> {
   return new Map((data ?? []).map((c) => [c.id, { slug: c.slug, label: c.label_en }]));
 }
 
-export type Category = {
-  slug: string;
+export type CategoryGroup = {
+  key: string;
   labelKr: string;
   labelEn: string;
+  categorySlugs: string[];
 };
 
-export async function getCategories(): Promise<Category[]> {
-  const { data, error } = await supabaseAdmin.from("categories").select("slug, label_kr, label_en").order("id");
-  if (error) throw error;
-  return (data ?? []).map((c) => ({ slug: c.slug, labelKr: c.label_kr, labelEn: c.label_en }));
+export async function getCategoryGroups(): Promise<CategoryGroup[]> {
+  const [{ data: groups, error: groupsErr }, { data: cats, error: catsErr }] = await Promise.all([
+    supabaseAdmin.from("category_groups").select("id, category_ids, sort_order").order("sort_order"),
+    supabaseAdmin.from("categories").select("id, slug, label_kr, label_en"),
+  ]);
+  if (groupsErr) throw groupsErr;
+  if (catsErr) throw catsErr;
+
+  const catById = new Map((cats ?? []).map((c) => [c.id, c]));
+  const groupedIds = new Set<number>();
+
+  const result: CategoryGroup[] = (groups ?? []).map((g) => {
+    const ids: number[] = g.category_ids ?? [];
+    ids.forEach((id) => groupedIds.add(id));
+    const members = ids.map((id) => catById.get(id)).filter((c): c is NonNullable<typeof c> => Boolean(c));
+    return {
+      key: String(g.id),
+      labelKr: members.map((c) => c.label_kr).join("·"),
+      labelEn: members.map((c) => c.label_en).join(" · "),
+      categorySlugs: members.map((c) => c.slug),
+    };
+  });
+
+  // 어떤 큐레이션된 그룹에도 속하지 않은 카테고리는 자동으로 "기타"로 묶는다
+  const leftover = (cats ?? []).filter((c) => !groupedIds.has(c.id));
+  if (leftover.length > 0) {
+    result.push({
+      key: "etc",
+      labelKr: "기타",
+      labelEn: "Etc",
+      categorySlugs: leftover.map((c) => c.slug),
+    });
+  }
+
+  return result;
 }
 
 function resolveCategories(categoryIds: number[] | null | undefined, catMap: Map<number, WorkCategory>): WorkCategory[] {

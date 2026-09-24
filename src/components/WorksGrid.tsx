@@ -1,18 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import type { Category, WorkListItem } from "@/lib/getWorks";
+import type { CategoryGroup, WorkListItem } from "@/lib/getWorks";
 import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
 import WorkThumbnail from "@/components/WorkThumbnail";
 
-export default function WorksGrid({ works, categories }: { works: WorkListItem[]; categories: Category[] }) {
+export default function WorksGrid({
+  works,
+  categoryGroups,
+}: {
+  works: WorkListItem[];
+  categoryGroups: CategoryGroup[];
+}) {
   const [active, setActive] = useState<string>("all");
-  const hasCategory = (w: WorkListItem, slug: string) => w.categories.some((c) => c.slug === slug);
-  const visible = active === "all" ? works : works.filter((w) => hasCategory(w, active));
+  const groupByKey = new Map(categoryGroups.map((g) => [g.key, g]));
+  const hasGroup = (w: WorkListItem, group: CategoryGroup) =>
+    w.categories.some((c) => group.categorySlugs.includes(c.slug));
+  const isInFilter = (w: WorkListItem, key: string) => {
+    const group = groupByKey.get(key);
+    return group ? hasGroup(w, group) : false;
+  };
+  const visible = active === "all" ? works : works.filter((w) => isInFilter(w, active));
 
   const filters = [
     { f: "all", en: "All", kr: "전체" },
-    ...categories.map((c) => ({ f: c.slug, en: c.labelEn, kr: c.labelKr })),
+    ...categoryGroups.map((g) => ({ f: g.key, en: g.labelEn, kr: g.labelKr })),
   ];
 
   return (
@@ -24,7 +36,7 @@ export default function WorksGrid({ works, categories }: { works: WorkListItem[]
               <span className="b-en">{en}</span>
               <span className="b-kr">{kr}</span>
             </span>{" "}
-            <i>{f === "all" ? works.length : works.filter((w) => hasCategory(w, f)).length}</i>
+            <i>{f === "all" ? works.length : works.filter((w) => isInFilter(w, f)).length}</i>
           </button>
         ))}
       </div>
