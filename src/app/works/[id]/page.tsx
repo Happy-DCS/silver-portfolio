@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
@@ -39,8 +40,15 @@ export default async function WorkDetailPage({ params }: PageProps<"/works/[id]"
         <h1>{work.titleKr}</h1>
         <span className="en">{work.titleEn}</span>
         <div className="wk-meta">
-          <span>{work.year}</span>
-          <span>{work.categories.map((c) => c.label).join(" · ")}</span>
+          <div className="wk-tags">
+            <span>{work.year}</span>
+            <span>{work.categories.map((c) => c.label).join(" · ")}</span>
+          </div>
+          {work.pdfUrl && (
+            <a className="wk-download" href={work.pdfUrl} download target="_blank" rel="noopener">
+              <Image src="/assets/img/download.png" alt="PDF 다운로드" width={20} height={20} />
+            </a>
+          )}
         </div>
       </div>
 

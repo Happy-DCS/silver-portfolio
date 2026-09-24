@@ -1169,17 +1169,48 @@ main {
 }
 .wk-meta {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
   gap: 10px;
-  flex-wrap: wrap;
   margin-top: 34px;
-  font-size: 13.5px;
   letter-spacing: 0.04em;
 }
+.wk-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
 .wk-meta span {
+  font-size: clamp(13.5px, calc(13.5px + (100vw - 320px) * 0.00223), 16px);
   border: 1px solid var(--line);
   border-radius: 100px;
-  padding: 8px 18px;
+  padding: clamp(6px, calc(6px + (100vw - 320px) * 0.001786), 8px)
+    clamp(14px, calc(14px + (100vw - 320px) * 0.003571), 18px);
   color: var(--ink);
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+.wk-download {
+  flex-shrink: 0;
+  width: clamp(36px, calc(36px + (100vw - 320px) * 0.00714), 44px);
+  height: clamp(36px, calc(36px + (100vw - 320px) * 0.00714), 44px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+.wk-download img {
+  width: clamp(16px, calc(16px + (100vw - 320px) * 0.00357), 20px);
+  height: clamp(16px, calc(16px + (100vw - 320px) * 0.00357), 20px);
+}
+.wk-download:hover {
+  background: var(--line);
+  border-color: var(--ink);
 }
 
 /* PDF 뷰어 */
