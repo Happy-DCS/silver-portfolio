@@ -1185,7 +1185,8 @@ main {
   font-size: clamp(13.5px, calc(13.5px + (100vw - 320px) * 0.00223), 16px);
   border: 1px solid var(--line);
   border-radius: 100px;
-  padding: 8px 18px;
+  padding: clamp(6px, calc(6px + (100vw - 320px) * 0.001786), 8px)
+    clamp(14px, calc(14px + (100vw - 320px) * 0.003571), 18px);
   color: var(--ink);
 }
 .wk-download {
