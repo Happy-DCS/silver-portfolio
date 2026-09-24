@@ -1,43 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import type { WorkListItem } from "@/lib/getWorks";
-import { formatCategories } from "@/lib/categoryLabels";
+import type { CategoryGroup, WorkListItem } from "@/lib/getWorks";
+import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
+import WorkThumbnail from "@/components/WorkThumbnail";
 
-const FILTERS = [
-  { f: "all", en: "All", kr: "전체" },
-  { f: "branding", en: "Branding", kr: "브랜딩" },
-  { f: "graphic", en: "Graphic·Poster", kr: "그래픽·포스터" },
-  { f: "book", en: "Book·Editorial", kr: "북·편집" },
-  { f: "uiux", en: "UI/UX", kr: "UI/UX" },
-  { f: "product", en: "Product", kr: "제품" },
-] as const;
-
-const CATEGORY_GRADIENTS: Record<string, string> = {
-  branding: "linear-gradient(135deg,#c9541e,#f3d34a)",
-  graphic: "linear-gradient(135deg,#2f7d43,#cfe3a8)",
-  book: "linear-gradient(135deg,#2b3a67,#8ea7d9)",
-  uiux: "linear-gradient(135deg,#584a8f,#e3b8d5)",
-  product: "linear-gradient(135deg,#8d9198,#e6e8ec)",
-  motion: "linear-gradient(135deg,#1f2d24,#6fbf8a)",
-  web: "linear-gradient(135deg,#28607a,#a8d8e8)",
-};
-const DEFAULT_GRADIENT = "linear-gradient(135deg,#8d9198,#e6e8ec)";
-
-export default function WorksGrid({ works }: { works: WorkListItem[] }) {
+export default function WorksGrid({
+  works,
+  categoryGroups,
+}: {
+  works: WorkListItem[];
+  categoryGroups: CategoryGroup[];
+}) {
   const [active, setActive] = useState<string>("all");
-  const visible = active === "all" ? works : works.filter((w) => w.categories.includes(active));
+  const groupByKey = new Map(categoryGroups.map((g) => [g.key, g]));
+  const hasGroup = (w: WorkListItem, group: CategoryGroup) =>
+    w.categories.some((c) => group.categorySlugs.includes(c.slug));
+  const isInFilter = (w: WorkListItem, key: string) => {
+    const group = groupByKey.get(key);
+    return group ? hasGroup(w, group) : false;
+  };
+  const visible = active === "all" ? works : works.filter((w) => isInFilter(w, active));
+
+  const filters = [
+    { f: "all", en: "All", kr: "전체" },
+    ...categoryGroups.map((g) => ({ f: g.key, en: g.labelEn, kr: g.labelKr })),
+  ];
 
   return (
     <div className="container">
       <div className="filters">
-        {FILTERS.map(({ f, en, kr }) => (
+        {filters.map(({ f, en, kr }) => (
           <button key={f} className={active === f ? "on" : undefined} onClick={() => setActive(f)}>
             <span className="bw">
               <span className="b-en">{en}</span>
               <span className="b-kr">{kr}</span>
             </span>{" "}
-            <i>{f === "all" ? works.length : works.filter((w) => w.categories.includes(f)).length}</i>
+            <i>{f === "all" ? works.length : works.filter((w) => isInFilter(w, f)).length}</i>
           </button>
         ))}
       </div>
@@ -45,17 +44,19 @@ export default function WorksGrid({ works }: { works: WorkListItem[] }) {
       <div className="grid">
         {visible.map((w) => (
           <a key={w.id} className="card" href={`/works/${w.id}`}>
-            <div
-              className="ph"
-              style={{ aspectRatio: w.ratio, background: CATEGORY_GRADIENTS[w.categories[0]] ?? DEFAULT_GRADIENT }}
-            >
-              <em>{w.titleEn}</em>
+            <div className="ph" style={{ aspectRatio: w.ratio }}>
+              <WorkThumbnail
+                pdfUrl={w.pdfUrl}
+                fallbackBg={categoryGradient(w.categories[0]?.slug)}
+                accentColor={categoryAccent(w.categories[0]?.slug)}
+                label={w.titleEn}
+              />
             </div>
             <div className="meta">
               <span className="t-kr">{w.titleKr}</span>
               <span className="yr">{w.year}</span>
             </div>
-            <span className="cat">{formatCategories(w.categories)}</span>
+            <span className="cat">{w.categories.map((c) => c.label).join(" · ")}</span>
           </a>
         ))}
       </div>

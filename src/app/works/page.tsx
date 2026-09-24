@@ -1,10 +1,10 @@
 import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
 import WorksGrid from "@/components/WorksGrid";
-import { getWorks } from "@/lib/getWorks";
+import { getCategoryGroups, getWorks } from "@/lib/getWorks";
 
 export default async function WorksPage() {
-  const works = await getWorks();
+  const [works, categoryGroups] = await Promise.all([getWorks(), getCategoryGroups()]);
 
   return (
     <>
@@ -21,7 +21,7 @@ export default async function WorksPage() {
         </h1>
       </div>
 
-      <WorksGrid works={works} />
+      <WorksGrid works={works} categoryGroups={categoryGroups} />
 
       <Footer />
       <TopButton />
