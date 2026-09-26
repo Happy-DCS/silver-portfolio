@@ -45,7 +45,7 @@ export default async function Home() {
 
               if (!work) {
                 return (
-                  <div key={`empty-${i}`} className="art art--empty" style={style}>
+                  <div key={i} className="art art--empty" style={style}>
                     <div className={`ph ${layout.ratio} ph-placeholder`} />
                     <span className="lb">기대해주세요</span>
                   </div>
@@ -53,7 +53,7 @@ export default async function Home() {
               }
 
               return (
-                <a key={work.id} className="art" style={style} href={`/works/${work.id}`}>
+                <a key={i} className="art" style={style} href={`/works/${work.id}`}>
                   <div className={`ph ${layout.ratio}`}>
                     <WorkThumbnail
                       pdfUrl={work.pdfUrl}
