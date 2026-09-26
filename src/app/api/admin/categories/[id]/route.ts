@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminToken } from "@/lib/adminAuth";
+import { slugify } from "@/lib/slugify";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,7 +13,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const update: Record<string, unknown> = {};
   if (typeof body.labelKr === "string") update.label_kr = body.labelKr;
-  if (typeof body.labelEn === "string") update.label_en = body.labelEn;
+  if (typeof body.labelEn === "string") {
+    update.label_en = body.labelEn;
+    update.slug = slugify(body.labelEn);
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "수정할 항목이 없습니다." }, { status: 400 });

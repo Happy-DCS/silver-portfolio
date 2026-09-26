@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminToken } from "@/lib/adminAuth";
+import { slugify } from "@/lib/slugify";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const BUCKET = "work-pdfs";
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
   const pdfFile = form.get("pdf");
 
   let categoryIds: number[] = [];
-  let newCategories: { slug: string; labelKr: string; labelEn: string }[] = [];
+  let newCategories: { labelKr: string; labelEn: string }[] = [];
   try {
     categoryIds = JSON.parse(String(form.get("categoryIds") ?? "[]"));
     newCategories = JSON.parse(String(form.get("newCategories") ?? "[]"));
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   if (newCategories.length > 0) {
     const { data: created, error: catErr } = await supabaseAdmin
       .from("categories")
-      .insert(newCategories.map((c) => ({ slug: c.slug, label_kr: c.labelKr, label_en: c.labelEn })))
+      .insert(newCategories.map((c) => ({ slug: slugify(c.labelEn), label_kr: c.labelKr, label_en: c.labelEn })))
       .select("id");
     if (catErr) return NextResponse.json({ error: catErr.message }, { status: 500 });
     finalCategoryIds = [...finalCategoryIds, ...(created ?? []).map((c) => c.id)];

@@ -5,6 +5,8 @@ import { useState, type DragEvent } from "react";
 import type { AdminCategory, AdminCategoryGroup } from "@/lib/getWorks";
 import { adminFetch } from "@/lib/adminFetch";
 import { useAdminToken } from "./AdminAuthContext";
+import AdminCategoryEditForm from "./AdminCategoryEditForm";
+import AdminModal from "./AdminModal";
 
 const DRAG_TYPE = "text/x-category-id";
 
@@ -20,6 +22,7 @@ export default function AdminCategoriesPanel({
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<AdminCategory | null>(null);
 
   const groupedIds = new Set(categoryGroups.flatMap((g) => g.categoryIds));
   const pool = categories.filter((c) => !groupedIds.has(c.id));
@@ -153,7 +156,11 @@ export default function AdminCategoriesPanel({
               <span className="admin-list-title">{c.labelKr}</span>
               <span className="admin-list-sub">{c.labelEn}</span>
             </span>
-            <button type="button" className="admin-submit admin-list-btn">
+            <button
+              type="button"
+              className="admin-submit admin-list-btn"
+              onClick={() => setEditingCategory(c)}
+            >
               수정
             </button>
             <button
@@ -168,6 +175,18 @@ export default function AdminCategoriesPanel({
           </li>
         ))}
       </ul>
+
+      <AdminModal open={editingCategory !== null} onClose={() => setEditingCategory(null)} title="카테고리 수정">
+        {editingCategory && (
+          <AdminCategoryEditForm
+            category={editingCategory}
+            onSaved={() => {
+              setEditingCategory(null);
+              router.refresh();
+            }}
+          />
+        )}
+      </AdminModal>
     </div>
   );
 }

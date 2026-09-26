@@ -5,21 +5,13 @@ import Script from "next/script";
 import type { AdminCategory } from "@/lib/getWorks";
 import { adminFetch } from "@/lib/adminFetch";
 import { PDFJS_VERSION } from "@/lib/pdfjs";
+import { slugify } from "@/lib/slugify";
 import { useAdminToken } from "./AdminAuthContext";
 
 type DraftCategory = {
   id: string;
   label: string;
 };
-
-function slugify(label: string): string {
-  const slug = label
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug || `category-${Date.now()}`;
-}
 
 type RatioStatus = "idle" | "loading" | "done" | "error";
 
@@ -121,10 +113,7 @@ export default function AdminWorkForm({
       form.set("description", description);
       form.set("ratio", String(ratio ?? 1));
       form.set("categoryIds", JSON.stringify([...selectedIds]));
-      form.set(
-        "newCategories",
-        JSON.stringify(drafts.map((d) => ({ slug: d.id, labelKr: d.label, labelEn: d.label })))
-      );
+      form.set("newCategories", JSON.stringify(drafts.map((d) => ({ labelKr: d.label, labelEn: d.label }))));
       form.set("pdf", pdfFile);
 
       const res = await adminFetch(token, "/api/admin/works", { method: "POST", body: form });
