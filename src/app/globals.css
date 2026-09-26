@@ -459,6 +459,7 @@ section {
 .art .ph {
   width: 100%;
   overflow: hidden;
+  position: relative;
   display: flex;
   align-items: flex-end;
   padding: 16px;
@@ -474,7 +475,9 @@ section {
   position: absolute;
   left: 2px;
   top: calc(100% + 14px);
-  white-space: nowrap;
+  width: calc(100% - 4px);
+  white-space: normal;
+  overflow-wrap: break-word;
   font-family: var(--serif-kr);
   font-weight: 700;
   font-size: clamp(10px, calc(10px + (100vw - 320px) * 0.006863), 17px);
@@ -717,16 +720,6 @@ html.js .collage .art.in:hover {
 .ph-fallback {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: flex-end;
-  padding: 18px;
-}
-.ph-fallback em,
-.ph-label {
-  font-family: var(--serif-en);
-  font-style: italic;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
 }
 .ph-canvas {
   position: absolute;
@@ -746,8 +739,14 @@ html.js .collage .art.in:hover {
 }
 .ph-label {
   position: absolute;
-  left: 18px;
-  bottom: 18px;
+  left: min(18px, 5%);
+  right: min(18px, 5%);
+  bottom: min(18px, 5%);
+  overflow: hidden;
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
 }
 .card .meta {
   display: flex;
@@ -1459,6 +1458,75 @@ main {
 .admin-category-add input:focus {
   outline: none;
   border-color: var(--ink);
+}
+.admin-featured-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+}
+.admin-featured-slot {
+  flex: 1 1 140px;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.admin-featured-slot .ph {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--line);
+}
+.admin-featured-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+.admin-featured-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.admin-featured-picker-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.admin-featured-focal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-featured-focal-preview {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: crosshair;
+}
+.admin-focal-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #facc15;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 .admin-error {
   font-size: 13px;

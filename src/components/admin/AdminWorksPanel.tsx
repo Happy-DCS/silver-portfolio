@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
 import AdminCategoriesPanel from "./AdminCategoriesPanel";
+import AdminFeaturedGrid from "./AdminFeaturedGrid";
 import AdminModal from "./AdminModal";
 import AdminWorkForm, { type NewWorkDraft } from "./AdminWorkForm";
 
@@ -41,22 +42,7 @@ export default function AdminWorksPanel({
           <h2>대표 작업물</h2>
           <span className="admin-count">{featured.length}</span>
         </div>
-        <ul className="admin-list">
-          {featured.map((w) => (
-            <li key={w.id} className="admin-list-row">
-              <span className="admin-list-main">
-                <span className="admin-list-title">{w.titleKr}</span>
-                <span className="admin-list-sub">
-                  {w.titleEn} · {w.year}
-                </span>
-              </span>
-              <span className="admin-list-cat">{w.categories.map((c) => c.label).join(" · ")}</span>
-              <button type="button" className="admin-submit admin-list-btn">
-                수정
-              </button>
-            </li>
-          ))}
-        </ul>
+        <AdminFeaturedGrid works={works} />
       </div>
 
       <AdminCategoriesPanel categories={categories} categoryGroups={categoryGroups} />
