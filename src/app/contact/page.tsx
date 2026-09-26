@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { getProfile } from "@/lib/getProfile";
 
+export const dynamic = "force-dynamic";
+
 export default async function ContactPage() {
   const profile = await getProfile();
 

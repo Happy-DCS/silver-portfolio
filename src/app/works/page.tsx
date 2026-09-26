@@ -3,6 +3,8 @@ import TopButton from "@/components/TopButton";
 import WorksGrid from "@/components/WorksGrid";
 import { getCategoryGroups, getWorks } from "@/lib/getWorks";
 
+export const dynamic = "force-dynamic";
+
 export default async function WorksPage() {
   const [works, categoryGroups] = await Promise.all([getWorks(), getCategoryGroups()]);
 

@@ -2,6 +2,8 @@ import AdminGate from "@/components/admin/AdminGate";
 import { getAdminCategories, getAdminCategoryGroups, getFeaturedSlots, getWorks } from "@/lib/getWorks";
 import { getProfile } from "@/lib/getProfile";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const [works, categories, categoryGroups, featuredSlots, profile] = await Promise.all([
     getWorks(),
