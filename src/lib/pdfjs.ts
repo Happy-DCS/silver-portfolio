@@ -12,7 +12,7 @@ export type PdfDocument = {
 
 export type PdfJsLib = {
   GlobalWorkerOptions: { workerSrc: string };
-  getDocument: (path: string) => { promise: Promise<PdfDocument> };
+  getDocument: (src: string | { data: ArrayBuffer }) => { promise: Promise<PdfDocument> };
 };
 
 export const PDFJS_VERSION = "3.11.174";

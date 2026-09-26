@@ -22,6 +22,33 @@ async function getCategoryMap(): Promise<Map<number, WorkCategory>> {
   return new Map((data ?? []).map((c) => [c.id, { slug: c.slug, label: c.label_en }]));
 }
 
+export type AdminCategory = {
+  id: number;
+  slug: string;
+  labelKr: string;
+  labelEn: string;
+};
+
+export async function getAdminCategories(): Promise<AdminCategory[]> {
+  const { data, error } = await supabaseAdmin.from("categories").select("id, slug, label_kr, label_en").order("id");
+  if (error) throw error;
+  return (data ?? []).map((c) => ({ id: c.id, slug: c.slug, labelKr: c.label_kr, labelEn: c.label_en }));
+}
+
+export type AdminCategoryGroup = {
+  id: number;
+  categoryIds: number[];
+};
+
+export async function getAdminCategoryGroups(): Promise<AdminCategoryGroup[]> {
+  const { data, error } = await supabaseAdmin
+    .from("category_groups")
+    .select("id, category_ids")
+    .order("sort_order");
+  if (error) throw error;
+  return (data ?? []).map((g) => ({ id: g.id, categoryIds: g.category_ids ?? [] }));
+}
+
 export type CategoryGroup = {
   key: string;
   labelKr: string;

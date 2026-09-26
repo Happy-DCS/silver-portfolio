@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
+import PhLabel from "@/components/PhLabel";
 import { PDFJS_VERSION } from "@/lib/pdfjs";
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -17,11 +18,13 @@ export default function WorkThumbnail({
   fallbackBg,
   accentColor,
   label,
+  focalPoint,
 }: {
   pdfUrl: string | null;
   fallbackBg: string;
   accentColor: string;
   label: string;
+  focalPoint?: { x: number; y: number };
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [pdfjsReady, setPdfjsReady] = useState(false);
@@ -63,7 +66,7 @@ export default function WorkThumbnail({
   if (failed) {
     return (
       <div className="ph-fallback" style={{ background: fallbackBg }}>
-        <em>{label}</em>
+        <PhLabel>{label}</PhLabel>
       </div>
     );
   }
@@ -75,7 +78,11 @@ export default function WorkThumbnail({
         onReady={() => setPdfjsReady(true)}
         onError={() => setFailed(true)}
       />
-      <canvas ref={canvasRef} className="ph-canvas" />
+      <canvas
+        ref={canvasRef}
+        className="ph-canvas"
+        style={focalPoint ? { objectPosition: `${focalPoint.x}% ${focalPoint.y}%` } : undefined}
+      />
       <div className="ph-tint" style={{ background: fallbackBg }} />
       <div
         className="ph-scrim"
@@ -83,7 +90,7 @@ export default function WorkThumbnail({
           background: `linear-gradient(to top, ${hexToRgba(accentColor, 0.75)}, ${hexToRgba(accentColor, 0)} 55%)`,
         }}
       />
-      <em className="ph-label">{label}</em>
+      <PhLabel>{label}</PhLabel>
     </>
   );
 }

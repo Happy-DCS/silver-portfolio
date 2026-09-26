@@ -1,13 +1,17 @@
 import AdminGate from "@/components/admin/AdminGate";
-import { getWorks } from "@/lib/getWorks";
+import { getAdminCategories, getAdminCategoryGroups, getWorks } from "@/lib/getWorks";
 
 export default async function AdminPage() {
-  const works = await getWorks();
+  const [works, categories, categoryGroups] = await Promise.all([
+    getWorks(),
+    getAdminCategories(),
+    getAdminCategoryGroups(),
+  ]);
 
   return (
     <div className="admin-page">
       <div className="container">
-        <AdminGate works={works} />
+        <AdminGate works={works} categories={categories} categoryGroups={categoryGroups} />
       </div>
     </div>
   );
