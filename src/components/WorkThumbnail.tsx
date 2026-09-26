@@ -3,7 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import PhLabel from "@/components/PhLabel";
-import { PDFJS_VERSION } from "@/lib/pdfjs";
+import { PDFJS_VERSION, type PdfDocument } from "@/lib/pdfjs";
+
+// 같은 작업물이 여러 슬롯/카드에 동시에 표시될 때, 동일한 PDF URL을 각자
+// 따로 getDocument()하지 않고 하나의 로딩 작업을 공유한다.
+const pdfDocumentCache = new Map<string, Promise<PdfDocument>>();
+
+function loadPdfDocument(pdfUrl: string): Promise<PdfDocument> {
+  const cached = pdfDocumentCache.get(pdfUrl);
+  if (cached) return cached;
+
+  const pdfjsLib = window.pdfjsLib;
+  if (!pdfjsLib) return Promise.reject(new Error("pdf.js가 로드되지 않았습니다."));
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
+  const promise = pdfjsLib.getDocument(pdfUrl).promise;
+  pdfDocumentCache.set(pdfUrl, promise);
+  promise.catch(() => pdfDocumentCache.delete(pdfUrl));
+  return promise;
+}
 
 function hexToRgba(hex: string, alpha: number): string {
   const n = parseInt(hex.replace("#", ""), 16);
@@ -33,15 +51,12 @@ export default function WorkThumbnail({
   useEffect(() => {
     if (!pdfUrl) return;
     const canvas = canvasRef.current;
-    const pdfjsLib = window.pdfjsLib;
-    if (!pdfjsReady || !canvas || !pdfjsLib) return;
+    if (!pdfjsReady || !canvas || !window.pdfjsLib) return;
 
     let cancelled = false;
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
 
-    pdfjsLib
-      .getDocument(pdfUrl)
-      .promise.then(async (pdf) => {
+    loadPdfDocument(pdfUrl)
+      .then(async (pdf) => {
         if (cancelled) return;
         const page = await pdf.getPage(1);
         const cw = canvas.parentElement?.clientWidth ?? 400;
