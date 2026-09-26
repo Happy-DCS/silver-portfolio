@@ -1357,6 +1357,7 @@ main {
 }
 .admin-panel-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
@@ -1364,6 +1365,7 @@ main {
 .admin-panel-head-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -1379,6 +1381,7 @@ main {
   font-size: clamp(26px, calc(26px + (100vw - 320px) * 0.02059), 40px);
   letter-spacing: -0.02em;
   margin-top: -4px;
+  white-space: nowrap;
 }
 .admin-desc {
   color: var(--muted);
