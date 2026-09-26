@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { WorkListItem } from "@/lib/getWorks";
 import AdminLoginForm from "./AdminLoginForm";
 import AdminLogoutButton from "./AdminLogoutButton";
 import AdminWorksPanel from "./AdminWorksPanel";
 
-export default function AdminGate() {
+export default function AdminGate({ works }: { works: WorkListItem[] }) {
   const [authed, setAuthed] = useState(false);
 
   if (!authed) {
@@ -21,7 +22,7 @@ export default function AdminGate() {
         </div>
         <AdminLogoutButton onLogout={() => setAuthed(false)} />
       </div>
-      <AdminWorksPanel />
+      <AdminWorksPanel works={works} />
     </div>
   );
 }

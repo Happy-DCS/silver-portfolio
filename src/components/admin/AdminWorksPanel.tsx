@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { WORKS } from "@/data/works";
+import type { WorkListItem } from "@/lib/getWorks";
 
 const FEATURED_COUNT = 5;
 
-export default function AdminWorksPanel() {
-  const [works, setWorks] = useState(WORKS);
+export default function AdminWorksPanel({ works: initialWorks }: { works: WorkListItem[] }) {
+  const [works, setWorks] = useState(initialWorks);
   const featured = works.slice(0, FEATURED_COUNT);
-  const featuredIds = new Set(featured.map((w) => w.p));
+  const featuredIds = new Set(featured.map((w) => w.id));
 
   function handleRemove(id: number) {
-    setWorks((prev) => prev.filter((w) => w.p !== id));
+    setWorks((prev) => prev.filter((w) => w.id !== id));
   }
 
   return (
@@ -23,14 +23,14 @@ export default function AdminWorksPanel() {
         </div>
         <ul className="admin-list">
           {featured.map((w) => (
-            <li key={w.p} className="admin-list-row">
+            <li key={w.id} className="admin-list-row">
               <span className="admin-list-main">
                 <span className="admin-list-title">{w.titleKr}</span>
                 <span className="admin-list-sub">
                   {w.titleEn} · {w.year}
                 </span>
               </span>
-              <span className="admin-list-cat">{w.catLabel}</span>
+              <span className="admin-list-cat">{w.categories.map((c) => c.label).join(" · ")}</span>
               <button type="button" className="admin-submit admin-list-btn">
                 수정
               </button>
@@ -49,21 +49,21 @@ export default function AdminWorksPanel() {
         </div>
         <ul className="admin-list">
           {works.map((w) => {
-            const locked = featuredIds.has(w.p);
+            const locked = featuredIds.has(w.id);
             return (
-              <li key={w.p} className="admin-list-row">
+              <li key={w.id} className="admin-list-row">
                 <span className="admin-list-main">
                   <span className="admin-list-title">{w.titleKr}</span>
                   <span className="admin-list-sub">
                     {w.titleEn} · {w.year}
                   </span>
                 </span>
-                <span className="admin-list-cat">{w.catLabel}</span>
+                <span className="admin-list-cat">{w.categories.map((c) => c.label).join(" · ")}</span>
                 <button
                   type="button"
                   className={locked ? "admin-remove-btn admin-remove-btn--locked" : "admin-remove-btn"}
                   disabled={locked}
-                  onClick={locked ? undefined : () => handleRemove(w.p)}
+                  onClick={locked ? undefined : () => handleRemove(w.id)}
                   aria-label={locked ? "대표 작업물은 삭제할 수 없습니다" : "작업물 삭제"}
                 >
                   −
