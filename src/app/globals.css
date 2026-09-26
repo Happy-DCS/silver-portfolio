@@ -465,12 +465,6 @@ section {
   padding: 16px;
   transition: box-shadow 0.45s ease;
 }
-.art .ph em {
-  font-family: var(--serif-en);
-  font-style: italic;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.9);
-}
 .art .lb {
   position: absolute;
   left: 2px;
@@ -504,6 +498,14 @@ section {
 .art:hover .lb {
   opacity: 1;
   transform: none;
+}
+.ph-placeholder {
+  background: var(--line);
+}
+.art--empty .lb {
+  opacity: 1;
+  transform: none;
+  color: var(--muted);
 }
 .r-45 {
   aspect-ratio: 4 / 5;

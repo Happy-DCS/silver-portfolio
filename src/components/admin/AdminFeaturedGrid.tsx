@@ -5,24 +5,21 @@ import { useState } from "react";
 import type { FeaturedSlot, WorkListItem } from "@/lib/getWorks";
 import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
 import { adminFetch } from "@/lib/adminFetch";
+import { centerFocalPoint } from "@/lib/cropFocalPoint";
 import WorkThumbnail from "@/components/WorkThumbnail";
 import { useAdminToken } from "./AdminAuthContext";
 import AdminCropPicker, { type CropArea } from "./AdminCropPicker";
 import AdminModal from "./AdminModal";
 
-// 홈페이지 collage(page.tsx의 COLLAGE)에서 각 슬롯이 실제로 쓰는 비율. 관리자 그리드 자체는
-// 단순 정사각형으로 통일했지만, 크롭을 정확히 잡으려면 모달 미리보기는 실제 랜딩페이지
-// 비율과 같아야 한다.
+// 홈페이지 collage(page.tsx의 COLLAGE_LAYOUT)에서 각 슬롯이 실제로 쓰는 비율. 관리자
+// 그리드 자체는 단순 정사각형으로 통일했지만, 크롭을 정확히 잡으려면 모달 미리보기는
+// 실제 랜딩페이지 비율과 같아야 한다.
 const SLOT_RATIOS = ["r-169", "r-34", "r-1610", "r-34", "r-169"];
 const RATIO_VALUES: Record<string, number> = {
   "r-169": 16 / 10,
   "r-34": 3 / 4,
   "r-1610": 16 / 9,
 };
-
-function centerFocalPoint(area: CropArea) {
-  return { x: area.x + area.width / 2, y: area.y + area.height / 2 };
-}
 
 export default function AdminFeaturedGrid({
   works,
