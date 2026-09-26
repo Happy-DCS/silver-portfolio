@@ -3,23 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import PhLabel from "@/components/PhLabel";
-import { PDFJS_VERSION, type PdfDocument } from "@/lib/pdfjs";
+import { PDFJS_VERSION } from "@/lib/pdfjs";
 
-// 같은 작업물이 여러 슬롯/카드에 동시에 표시될 때, 동일한 PDF URL을 각자
-// 따로 getDocument()하지 않고 하나의 로딩 작업을 공유한다.
-const pdfDocumentCache = new Map<string, Promise<PdfDocument>>();
+// 같은 작업물이 여러 슬롯/카드에 동시에 표시될 때, 동일한 PDF를 두 번 내려받지
+// 않도록 바이트만 공유한다. PDFDocumentProxy/PDFPageProxy 자체는 pdf.js가
+// 페이지 단위로 캐싱해 공유하기 때문에, 그걸 그대로 공유하면 같은 페이지 객체에
+// 동시에 render()가 두 번 걸려 한쪽이 조용히 실패한다 — 그래서 각 인스턴스가
+// 받아온 바이트의 복사본으로 자기만의 문서 객체를 새로 연다.
+const pdfBufferCache = new Map<string, Promise<ArrayBuffer>>();
 
-function loadPdfDocument(pdfUrl: string): Promise<PdfDocument> {
-  const cached = pdfDocumentCache.get(pdfUrl);
+function loadPdfBuffer(pdfUrl: string): Promise<ArrayBuffer> {
+  const cached = pdfBufferCache.get(pdfUrl);
   if (cached) return cached;
 
-  const pdfjsLib = window.pdfjsLib;
-  if (!pdfjsLib) return Promise.reject(new Error("pdf.js가 로드되지 않았습니다."));
-
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
-  const promise = pdfjsLib.getDocument(pdfUrl).promise;
-  pdfDocumentCache.set(pdfUrl, promise);
-  promise.catch(() => pdfDocumentCache.delete(pdfUrl));
+  const promise = fetch(pdfUrl).then((res) => {
+    if (!res.ok) throw new Error(`PDF를 불러오지 못했습니다: ${res.status}`);
+    return res.arrayBuffer();
+  });
+  pdfBufferCache.set(pdfUrl, promise);
+  promise.catch(() => pdfBufferCache.delete(pdfUrl));
   return promise;
 }
 
@@ -51,12 +53,16 @@ export default function WorkThumbnail({
   useEffect(() => {
     if (!pdfUrl) return;
     const canvas = canvasRef.current;
-    if (!pdfjsReady || !canvas || !window.pdfjsLib) return;
+    const pdfjsLib = window.pdfjsLib;
+    if (!pdfjsReady || !canvas || !pdfjsLib) return;
 
     let cancelled = false;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
 
-    loadPdfDocument(pdfUrl)
-      .then(async (pdf) => {
+    loadPdfBuffer(pdfUrl)
+      .then(async (buffer) => {
+        if (cancelled) return;
+        const pdf = await pdfjsLib.getDocument({ data: buffer.slice(0) }).promise;
         if (cancelled) return;
         const page = await pdf.getPage(1);
         const cw = canvas.parentElement?.clientWidth ?? 400;
