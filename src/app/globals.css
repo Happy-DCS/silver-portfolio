@@ -1682,6 +1682,11 @@ main {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
+  transition: opacity 0.15s ease;
+}
+.admin-lineup--pending {
+  opacity: 0.5;
+  pointer-events: none;
 }
 .admin-lineup-group {
   min-height: 44px;
