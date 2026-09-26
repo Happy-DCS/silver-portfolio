@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
-export default function AdminLoginForm({ onSuccess }: { onSuccess: () => void }) {
+export default function AdminLoginForm({ onSuccess }: { onSuccess: (token: string) => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,12 +18,12 @@ export default function AdminLoginForm({ onSuccess }: { onSuccess: () => void })
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.token) {
         setError(data?.error ?? "로그인에 실패했습니다.");
         return;
       }
-      onSuccess();
+      onSuccess(data.token);
     } finally {
       setLoading(false);
     }

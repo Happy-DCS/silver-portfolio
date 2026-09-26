@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
+import { AdminAuthProvider } from "./AdminAuthContext";
 import AdminLoginForm from "./AdminLoginForm";
 import AdminLogoutButton from "./AdminLogoutButton";
 import AdminWorksPanel from "./AdminWorksPanel";
@@ -15,22 +16,24 @@ export default function AdminGate({
   categories: AdminCategory[];
   categoryGroups: AdminCategoryGroup[];
 }) {
-  const [authed, setAuthed] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
-  if (!authed) {
-    return <AdminLoginForm onSuccess={() => setAuthed(true)} />;
+  if (!token) {
+    return <AdminLoginForm onSuccess={setToken} />;
   }
 
   return (
-    <div className="admin-panel">
-      <div className="admin-panel-head">
-        <div>
-          <p className="admin-eyebrow">Admin</p>
-          <h1 className="admin-title">관리자 페이지</h1>
+    <AdminAuthProvider token={token}>
+      <div className="admin-panel">
+        <div className="admin-panel-head">
+          <div>
+            <p className="admin-eyebrow">Admin</p>
+            <h1 className="admin-title">관리자 페이지</h1>
+          </div>
+          <AdminLogoutButton onLogout={() => setToken(null)} />
         </div>
-        <AdminLogoutButton onLogout={() => setAuthed(false)} />
+        <AdminWorksPanel works={works} categories={categories} categoryGroups={categoryGroups} />
       </div>
-      <AdminWorksPanel works={works} categories={categories} categoryGroups={categoryGroups} />
-    </div>
+    </AdminAuthProvider>
   );
 }

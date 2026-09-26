@@ -2,15 +2,15 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Script from "next/script";
-import type { AdminCategory, WorkCategory, WorkListItem } from "@/lib/getWorks";
+import type { AdminCategory } from "@/lib/getWorks";
+import { adminFetch } from "@/lib/adminFetch";
 import { PDFJS_VERSION } from "@/lib/pdfjs";
+import { useAdminToken } from "./AdminAuthContext";
 
 type DraftCategory = {
   id: string;
   label: string;
 };
-
-export type NewWorkDraft = Omit<WorkListItem, "id">;
 
 function slugify(label: string): string {
   const slug = label
@@ -25,11 +25,12 @@ type RatioStatus = "idle" | "loading" | "done" | "error";
 
 export default function AdminWorkForm({
   categories,
-  onSubmit,
+  onCreated,
 }: {
   categories: AdminCategory[];
-  onSubmit: (work: NewWorkDraft) => void;
+  onCreated: () => void;
 }) {
+  const token = useAdminToken();
   const [titleKr, setTitleKr] = useState("");
   const [titleEn, setTitleEn] = useState("");
   const [year, setYear] = useState("");
@@ -42,6 +43,8 @@ export default function AdminWorkForm({
   const [ratio, setRatio] = useState<number | null>(null);
   const [ratioStatus, setRatioStatus] = useState<RatioStatus>("idle");
   const [pdfjsReady, setPdfjsReady] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function toggleCategory(id: number) {
     setSelectedIds((prev) => {
@@ -103,25 +106,37 @@ export default function AdminWorkForm({
     }
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (!pdfFile) return;
+    setError(null);
+    setSubmitting(true);
 
-    // TODO: 지금은 Supabase에 실제로 저장하지 않고, 테스트용으로 현재 세션의 works 목록에만 반영한다.
-    const existing: WorkCategory[] = categories
-      .filter((c) => selectedIds.has(c.id))
-      .map((c) => ({ slug: c.slug, label: c.labelKr }));
-    const drafts: WorkCategory[] = draftCategories
-      .filter((d) => selectedDraftIds.has(d.id))
-      .map((d) => ({ slug: d.id, label: d.label }));
+    try {
+      const drafts = draftCategories.filter((d) => selectedDraftIds.has(d.id));
+      const form = new FormData();
+      form.set("titleKr", titleKr);
+      form.set("titleEn", titleEn);
+      form.set("year", year);
+      form.set("description", description);
+      form.set("ratio", String(ratio ?? 1));
+      form.set("categoryIds", JSON.stringify([...selectedIds]));
+      form.set(
+        "newCategories",
+        JSON.stringify(drafts.map((d) => ({ slug: d.id, labelKr: d.label, labelEn: d.label })))
+      );
+      form.set("pdf", pdfFile);
 
-    onSubmit({
-      titleKr,
-      titleEn,
-      year: Number(year) || new Date().getFullYear(),
-      categories: [...existing, ...drafts],
-      ratio: ratio ?? 1,
-      pdfUrl: pdfFile ? URL.createObjectURL(pdfFile) : null,
-    });
+      const res = await adminFetch(token, "/api/admin/works", { method: "POST", body: form });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setError(data?.error ?? "작업물 저장에 실패했습니다.");
+        return;
+      }
+      onCreated();
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -217,8 +232,10 @@ export default function AdminWorkForm({
         {ratioStatus === "error" && <p className="admin-field-hint">비율을 계산하지 못했습니다.</p>}
       </div>
 
-      <button type="submit" className="admin-submit">
-        저장
+      {error && <p className="admin-error">{error}</p>}
+
+      <button type="submit" className="admin-submit" disabled={submitting}>
+        {submitting ? "저장 중…" : "저장"}
       </button>
     </form>
   );

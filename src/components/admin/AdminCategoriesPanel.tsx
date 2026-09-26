@@ -1,7 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type DragEvent } from "react";
 import type { AdminCategory, AdminCategoryGroup } from "@/lib/getWorks";
+import { adminFetch } from "@/lib/adminFetch";
+import { useAdminToken } from "./AdminAuthContext";
 
 type LineupGroup = {
   id: string;
@@ -17,29 +20,37 @@ function nextDraftId() {
 const DRAG_TYPE = "text/x-category-id";
 
 export default function AdminCategoriesPanel({
-  categories: initialCategories,
+  categories,
   categoryGroups,
 }: {
   categories: AdminCategory[];
   categoryGroups: AdminCategoryGroup[];
 }) {
-  const [categories, setCategories] = useState(initialCategories);
+  const router = useRouter();
+  const token = useAdminToken();
   const [groups, setGroups] = useState<LineupGroup[]>(
     categoryGroups.map((g) => ({ id: String(g.id), categoryIds: g.categoryIds }))
   );
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
   const groupedIds = new Set(groups.flatMap((g) => g.categoryIds));
   const pool = categories.filter((c) => !groupedIds.has(c.id));
   const catById = new Map(categories.map((c) => [c.id, c]));
 
-  function handleRemoveCategory(id: number) {
-    setCategories((prev) => prev.filter((c) => c.id !== id));
-    setGroups((prev) =>
-      prev
-        .map((g) => ({ ...g, categoryIds: g.categoryIds.filter((cid) => cid !== id) }))
-        .filter((g) => g.categoryIds.length > 0)
-    );
+  async function handleRemoveCategory(id: number) {
+    setRemovingId(id);
+    try {
+      setGroups((prev) =>
+        prev
+          .map((g) => ({ ...g, categoryIds: g.categoryIds.filter((cid) => cid !== id) }))
+          .filter((g) => g.categoryIds.length > 0)
+      );
+      const res = await adminFetch(token, `/api/admin/categories/${id}`, { method: "DELETE" });
+      if (res.ok) router.refresh();
+    } finally {
+      setRemovingId(null);
+    }
   }
 
   function handleDragStart(e: DragEvent, id: number) {
@@ -137,6 +148,7 @@ export default function AdminCategoriesPanel({
             <button
               type="button"
               className="admin-remove-btn"
+              disabled={removingId === c.id}
               onClick={() => handleRemoveCategory(c.id)}
               aria-label="카테고리 삭제"
             >
