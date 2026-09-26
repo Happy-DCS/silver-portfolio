@@ -1361,6 +1361,12 @@ main {
   justify-content: space-between;
   gap: 20px;
 }
+.admin-panel-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 .admin-eyebrow {
   font-size: clamp(10px, calc(10px + (100vw - 320px) * 0.001786), 12px);
   letter-spacing: 0.16em;
