@@ -1841,6 +1841,12 @@ main {
 .admin-modal-close:hover {
   color: var(--ink);
 }
+.admin-modal-message {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-line;
+}
 @media (max-width: 575px) {
   .admin-modal-backdrop {
     padding: 0;

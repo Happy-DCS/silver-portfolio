@@ -37,11 +37,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
   const { data: works } = await supabaseAdmin
     .from("works")
-    .select("id, category_ids")
+    .select("id")
     .contains("category_ids", [categoryId]);
-  for (const w of works ?? []) {
-    const nextIds = ((w.category_ids as number[]) ?? []).filter((cid) => cid !== categoryId);
-    await supabaseAdmin.from("works").update({ category_ids: nextIds }).eq("id", w.id);
+  if ((works ?? []).length > 0) {
+    return NextResponse.json(
+      { error: "해당 카테고리에 포함된 작업물이 있습니다.\n작업물을 옮긴 후 다시 시도해주세요." },
+      { status: 409 }
+    );
   }
 
   const { data: groups } = await supabaseAdmin

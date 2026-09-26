@@ -23,6 +23,7 @@ export default function AdminCategoriesPanel({
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [editingCategory, setEditingCategory] = useState<AdminCategory | null>(null);
+  const [blockedDeleteMessage, setBlockedDeleteMessage] = useState<string | null>(null);
 
   const groupedIds = new Set(categoryGroups.flatMap((g) => g.categoryIds));
   const pool = categories.filter((c) => !groupedIds.has(c.id));
@@ -32,7 +33,12 @@ export default function AdminCategoriesPanel({
     setRemovingId(id);
     try {
       const res = await adminFetch(token, `/api/admin/categories/${id}`, { method: "DELETE" });
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        router.refresh();
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      setBlockedDeleteMessage(data?.error ?? "삭제에 실패했습니다.");
     } finally {
       setRemovingId(null);
     }
@@ -186,6 +192,14 @@ export default function AdminCategoriesPanel({
             }}
           />
         )}
+      </AdminModal>
+
+      <AdminModal
+        open={blockedDeleteMessage !== null}
+        onClose={() => setBlockedDeleteMessage(null)}
+        title="삭제할 수 없습니다"
+      >
+        <p className="admin-modal-message">{blockedDeleteMessage}</p>
       </AdminModal>
     </div>
   );
