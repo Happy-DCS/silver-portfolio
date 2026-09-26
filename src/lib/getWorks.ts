@@ -125,6 +125,41 @@ export async function getWorks(): Promise<WorkListItem[]> {
   });
 }
 
+export type CropArea = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type FeaturedSlot = {
+  slotIndex: number;
+  work: WorkListItem | null;
+  crop: CropArea | null;
+};
+
+export async function getFeaturedSlots(): Promise<FeaturedSlot[]> {
+  const [works, { data: slots, error }] = await Promise.all([
+    getWorks(),
+    supabaseAdmin
+      .from("featured_slots")
+      .select("slot_index, work_id, crop_x, crop_y, crop_width, crop_height")
+      .order("slot_index"),
+  ]);
+  if (error) throw error;
+
+  const workById = new Map(works.map((w) => [w.id, w]));
+
+  return (slots ?? []).map((s) => ({
+    slotIndex: s.slot_index,
+    work: s.work_id ? (workById.get(s.work_id) ?? null) : null,
+    crop:
+      s.crop_x !== null && s.crop_y !== null && s.crop_width !== null && s.crop_height !== null
+        ? { x: s.crop_x, y: s.crop_y, width: s.crop_width, height: s.crop_height }
+        : null,
+  }));
+}
+
 export type WorkDetail = {
   id: number;
   titleKr: string;

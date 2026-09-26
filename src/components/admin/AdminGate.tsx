@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
+import type { AdminCategory, AdminCategoryGroup, FeaturedSlot, WorkListItem } from "@/lib/getWorks";
 import { AdminAuthProvider } from "./AdminAuthContext";
 import AdminLoginForm from "./AdminLoginForm";
 import AdminLogoutButton from "./AdminLogoutButton";
@@ -11,10 +11,12 @@ export default function AdminGate({
   works,
   categories,
   categoryGroups,
+  featuredSlots,
 }: {
   works: WorkListItem[];
   categories: AdminCategory[];
   categoryGroups: AdminCategoryGroup[];
+  featuredSlots: FeaturedSlot[];
 }) {
   const [token, setToken] = useState<string | null>(null);
 
@@ -32,7 +34,12 @@ export default function AdminGate({
           </div>
           <AdminLogoutButton onLogout={() => setToken(null)} />
         </div>
-        <AdminWorksPanel works={works} categories={categories} categoryGroups={categoryGroups} />
+        <AdminWorksPanel
+          works={works}
+          categories={categories}
+          categoryGroups={categoryGroups}
+          featuredSlots={featuredSlots}
+        />
       </div>
     </AdminAuthProvider>
   );

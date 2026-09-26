@@ -1496,6 +1496,11 @@ main {
   flex-direction: column;
   gap: 20px;
 }
+.admin-featured-picker-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .admin-featured-picker-list {
   display: flex;
   flex-wrap: wrap;

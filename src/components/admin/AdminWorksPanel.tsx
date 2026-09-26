@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
+import type { AdminCategory, AdminCategoryGroup, FeaturedSlot, WorkListItem } from "@/lib/getWorks";
 import { adminFetch } from "@/lib/adminFetch";
 import { useAdminToken } from "./AdminAuthContext";
 import AdminCategoriesPanel from "./AdminCategoriesPanel";
@@ -10,23 +10,23 @@ import AdminFeaturedGrid from "./AdminFeaturedGrid";
 import AdminModal from "./AdminModal";
 import AdminWorkForm from "./AdminWorkForm";
 
-const FEATURED_COUNT = 5;
-
 export default function AdminWorksPanel({
   works,
   categories,
   categoryGroups,
+  featuredSlots,
 }: {
   works: WorkListItem[];
   categories: AdminCategory[];
   categoryGroups: AdminCategoryGroup[];
+  featuredSlots: FeaturedSlot[];
 }) {
   const router = useRouter();
   const token = useAdminToken();
   const [addOpen, setAddOpen] = useState(false);
   const [removingId, setRemovingId] = useState<number | null>(null);
-  const featured = works.slice(0, FEATURED_COUNT);
-  const featuredIds = new Set(featured.map((w) => w.id));
+  const filledSlots = featuredSlots.filter((s) => s.work !== null);
+  const featuredIds = new Set(filledSlots.map((s) => s.work!.id));
 
   async function handleRemove(id: number) {
     setRemovingId(id);
@@ -48,9 +48,9 @@ export default function AdminWorksPanel({
       <div className="admin-section-block">
         <div className="admin-section-head">
           <h2>대표 작업물</h2>
-          <span className="admin-count">{featured.length}</span>
+          <span className="admin-count">{filledSlots.length}</span>
         </div>
-        <AdminFeaturedGrid works={works} />
+        <AdminFeaturedGrid works={works} featuredSlots={featuredSlots} />
       </div>
 
       <AdminCategoriesPanel categories={categories} categoryGroups={categoryGroups} />

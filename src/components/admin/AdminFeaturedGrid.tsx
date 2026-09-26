@@ -1,13 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { WorkListItem } from "@/lib/getWorks";
+import type { FeaturedSlot, WorkListItem } from "@/lib/getWorks";
 import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
+import { adminFetch } from "@/lib/adminFetch";
 import WorkThumbnail from "@/components/WorkThumbnail";
+import { useAdminToken } from "./AdminAuthContext";
 import AdminCropPicker, { type CropArea } from "./AdminCropPicker";
 import AdminModal from "./AdminModal";
-
-const FEATURED_COUNT = 5;
 
 // 홈페이지 collage(page.tsx의 COLLAGE)에서 각 슬롯이 실제로 쓰는 비율. 관리자 그리드 자체는
 // 단순 정사각형으로 통일했지만, 크롭을 정확히 잡으려면 모달 미리보기는 실제 랜딩페이지
@@ -23,19 +24,26 @@ function centerFocalPoint(area: CropArea) {
   return { x: area.x + area.width / 2, y: area.y + area.height / 2 };
 }
 
-export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) {
-  const [slots, setSlots] = useState<(WorkListItem | null)[]>(() =>
-    Array.from({ length: FEATURED_COUNT }, (_, i) => works[i] ?? null)
-  );
-  const [cropAreas, setCropAreas] = useState<Record<number, CropArea>>({});
+export default function AdminFeaturedGrid({
+  works,
+  featuredSlots,
+}: {
+  works: WorkListItem[];
+  featuredSlots: FeaturedSlot[];
+}) {
+  const router = useRouter();
+  const token = useAdminToken();
   const [pickerSlot, setPickerSlot] = useState<number | null>(null);
   const [pendingWorkId, setPendingWorkId] = useState<number | null>(null);
   const [pendingArea, setPendingArea] = useState<CropArea | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
+
+  const slots = [...featuredSlots].sort((a, b) => a.slotIndex - b.slotIndex);
 
   function openPicker(index: number) {
-    const existing = slots[index];
+    const existing = slots[index]?.work ?? null;
     setPendingWorkId(existing?.id ?? null);
-    setPendingArea(existing ? cropAreas[existing.id] : undefined);
+    setPendingArea(slots[index]?.crop ?? undefined);
     setPickerSlot(index);
   }
 
@@ -45,18 +53,26 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
 
   function handlePickWork(work: WorkListItem) {
     setPendingWorkId(work.id);
-    setPendingArea(cropAreas[work.id]);
+    const existingSlot = slots.find((s) => s.work?.id === work.id);
+    setPendingArea(existingSlot?.crop ?? undefined);
   }
 
-  function handleConfirm() {
+  async function saveSlot(workId: number | null, crop: CropArea | undefined) {
     if (pickerSlot === null) return;
-    const work = works.find((w) => w.id === pendingWorkId) ?? null;
-    const slotIndex = pickerSlot;
-    setSlots((prev) => prev.map((s, i) => (i === slotIndex ? work : s)));
-    if (work && pendingArea) {
-      setCropAreas((prev) => ({ ...prev, [work.id]: pendingArea }));
+    setSaving(true);
+    try {
+      const res = await adminFetch(token, `/api/admin/featured-slots/${pickerSlot}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workId, crop: workId ? (crop ?? null) : null }),
+      });
+      if (res.ok) {
+        router.refresh();
+        closePicker();
+      }
+    } finally {
+      setSaving(false);
     }
-    closePicker();
   }
 
   const pendingWork = works.find((w) => w.id === pendingWorkId) ?? null;
@@ -65,16 +81,16 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
   return (
     <>
       <div className="admin-featured-grid">
-        {slots.map((work, i) => (
-          <button key={i} type="button" className="admin-featured-slot" onClick={() => openPicker(i)}>
-            {work ? (
+        {slots.map((slot, i) => (
+          <button key={slot.slotIndex} type="button" className="admin-featured-slot" onClick={() => openPicker(i)}>
+            {slot.work ? (
               <div className="ph">
                 <WorkThumbnail
-                  pdfUrl={work.pdfUrl}
-                  fallbackBg={categoryGradient(work.categories[0]?.slug)}
-                  accentColor={categoryAccent(work.categories[0]?.slug)}
-                  label={work.titleEn}
-                  focalPoint={cropAreas[work.id] ? centerFocalPoint(cropAreas[work.id]) : undefined}
+                  pdfUrl={slot.work.pdfUrl}
+                  fallbackBg={categoryGradient(slot.work.categories[0]?.slug)}
+                  accentColor={categoryAccent(slot.work.categories[0]?.slug)}
+                  label={slot.work.titleEn}
+                  focalPoint={slot.crop ? centerFocalPoint(slot.crop) : undefined}
                 />
               </div>
             ) : (
@@ -111,15 +127,30 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
               <AdminCropPicker
                 pdfUrl={pendingWork.pdfUrl}
                 aspect={RATIO_VALUES[pickerRatioClass]}
-                initialArea={cropAreas[pendingWork.id]}
+                initialArea={pendingArea}
                 onChange={setPendingArea}
               />
             </div>
           )}
 
-          <button type="button" className="admin-submit" onClick={handleConfirm} disabled={!pendingWork}>
-            적용
-          </button>
+          <div className="admin-featured-picker-actions">
+            <button
+              type="button"
+              className="admin-submit"
+              onClick={() => saveSlot(pendingWorkId, pendingArea)}
+              disabled={!pendingWork || saving}
+            >
+              {saving ? "저장 중…" : "적용"}
+            </button>
+            <button
+              type="button"
+              className="admin-submit admin-list-btn"
+              onClick={() => saveSlot(null, undefined)}
+              disabled={saving}
+            >
+              슬롯 비우기
+            </button>
+          </div>
         </div>
       </AdminModal>
     </>
