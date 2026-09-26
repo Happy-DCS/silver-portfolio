@@ -24,6 +24,8 @@ const COLLAGE_LAYOUT = [
 
 type CollageItem = { layout: (typeof COLLAGE_LAYOUT)[number]; slot: FeaturedSlot | undefined };
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const featuredSlots = await getFeaturedSlots();
   const slots = [...featuredSlots].sort((a, b) => a.slotIndex - b.slotIndex);

@@ -7,10 +7,7 @@ import TopButton from "@/components/TopButton";
 import WorkPdfViewer from "@/components/WorkPdfViewer";
 import { getWorkById, getWorks } from "@/lib/getWorks";
 
-export async function generateStaticParams() {
-  const works = await getWorks();
-  return works.map((w) => ({ id: String(w.id) }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
