@@ -10,7 +10,8 @@ import { useAdminToken } from "./AdminAuthContext";
 
 type DraftCategory = {
   id: string;
-  label: string;
+  labelKr: string;
+  labelEn: string;
 };
 
 type RatioStatus = "idle" | "loading" | "done" | "error";
@@ -30,7 +31,8 @@ export default function AdminWorkForm({
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [draftCategories, setDraftCategories] = useState<DraftCategory[]>([]);
   const [selectedDraftIds, setSelectedDraftIds] = useState<Set<string>>(new Set());
-  const [newCategoryLabel, setNewCategoryLabel] = useState("");
+  const [newCategoryLabelKr, setNewCategoryLabelKr] = useState("");
+  const [newCategoryLabelEn, setNewCategoryLabelEn] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [ratio, setRatio] = useState<number | null>(null);
   const [ratioStatus, setRatioStatus] = useState<RatioStatus>("idle");
@@ -57,16 +59,19 @@ export default function AdminWorkForm({
   }
 
   function handleAddDraftCategory() {
-    const label = newCategoryLabel.trim();
-    if (!label) return;
-    const id = slugify(label);
+    const labelKr = newCategoryLabelKr.trim();
+    const labelEn = newCategoryLabelEn.trim();
+    if (!labelKr || !labelEn) return;
+    const id = slugify(labelEn);
     if (draftCategories.some((d) => d.id === id)) {
-      setNewCategoryLabel("");
+      setNewCategoryLabelKr("");
+      setNewCategoryLabelEn("");
       return;
     }
-    setDraftCategories((prev) => [...prev, { id, label }]);
+    setDraftCategories((prev) => [...prev, { id, labelKr, labelEn }]);
     setSelectedDraftIds((prev) => new Set(prev).add(id));
-    setNewCategoryLabel("");
+    setNewCategoryLabelKr("");
+    setNewCategoryLabelEn("");
   }
 
   async function handlePdfChange(e: ChangeEvent<HTMLInputElement>) {
@@ -113,7 +118,7 @@ export default function AdminWorkForm({
       form.set("description", description);
       form.set("ratio", String(ratio ?? 1));
       form.set("categoryIds", JSON.stringify([...selectedIds]));
-      form.set("newCategories", JSON.stringify(drafts.map((d) => ({ labelKr: d.label, labelEn: d.label }))));
+      form.set("newCategories", JSON.stringify(drafts.map((d) => ({ labelKr: d.labelKr, labelEn: d.labelEn }))));
       form.set("pdf", pdfFile);
 
       const res = await adminFetch(token, "/api/admin/works", { method: "POST", body: form });
@@ -193,16 +198,21 @@ export default function AdminWorkForm({
               }
               onClick={() => toggleDraftCategory(d.id)}
             >
-              {d.label}
+              {d.labelKr}
               <span className="admin-category-chip-new">new</span>
             </button>
           ))}
         </div>
         <div className="admin-category-add">
           <input
-            placeholder="새 카테고리 이름"
-            value={newCategoryLabel}
-            onChange={(e) => setNewCategoryLabel(e.target.value)}
+            placeholder="새 카테고리 (한글)"
+            value={newCategoryLabelKr}
+            onChange={(e) => setNewCategoryLabelKr(e.target.value)}
+          />
+          <input
+            placeholder="새 카테고리 (영문)"
+            value={newCategoryLabelEn}
+            onChange={(e) => setNewCategoryLabelEn(e.target.value)}
           />
           <button type="button" className="admin-submit admin-list-btn" onClick={handleAddDraftCategory}>
             + 추가
