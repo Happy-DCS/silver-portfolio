@@ -3,7 +3,10 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import type { Profile } from "@/lib/getProfile";
 import { adminFetch } from "@/lib/adminFetch";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 import { useAdminToken } from "./AdminAuthContext";
+
+const PDF_BUCKET = "work-pdfs";
 
 export default function AdminProfileForm({ profile, onSaved }: { profile: Profile; onSaved: () => void }) {
   const token = useAdminToken();
@@ -27,15 +30,22 @@ export default function AdminProfileForm({ profile, onSaved }: { profile: Profil
     try {
       let finalResumeUrl = resumeUrl.trim() || null;
       if (resumeFile) {
-        const form = new FormData();
-        form.set("pdf", resumeFile);
-        const uploadRes = await adminFetch(token, "/api/admin/profile/resume", { method: "POST", body: form });
+        const uploadRes = await adminFetch(token, "/api/admin/profile/resume", { method: "POST" });
         const uploadData = await uploadRes.json().catch(() => null);
         if (!uploadRes.ok) {
-          setError(uploadData?.error ?? "이력서 업로드에 실패했습니다.");
+          setError(uploadData?.error ?? "업로드 URL 발급에 실패했습니다.");
           return;
         }
-        finalResumeUrl = uploadData.url;
+
+        const { error: uploadErr } = await supabaseBrowser.storage
+          .from(PDF_BUCKET)
+          .uploadToSignedUrl(uploadData.path, uploadData.token, resumeFile, { upsert: true });
+        if (uploadErr) {
+          setError("이력서 업로드에 실패했습니다.");
+          return;
+        }
+
+        finalResumeUrl = `${uploadData.publicUrl}?v=${Date.now()}`;
       }
 
       const res = await adminFetch(token, "/api/admin/profile", {

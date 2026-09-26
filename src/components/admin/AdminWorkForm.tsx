@@ -6,7 +6,10 @@ import type { AdminCategory } from "@/lib/getWorks";
 import { adminFetch } from "@/lib/adminFetch";
 import { PDFJS_VERSION } from "@/lib/pdfjs";
 import { slugify } from "@/lib/slugify";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 import { useAdminToken } from "./AdminAuthContext";
+
+const PDF_BUCKET = "work-pdfs";
 
 type DraftCategory = {
   id: string;
@@ -110,18 +113,36 @@ export default function AdminWorkForm({
     setSubmitting(true);
 
     try {
-      const drafts = draftCategories.filter((d) => selectedDraftIds.has(d.id));
-      const form = new FormData();
-      form.set("titleKr", titleKr);
-      form.set("titleEn", titleEn);
-      form.set("year", year);
-      form.set("description", description);
-      form.set("ratio", String(ratio ?? 1));
-      form.set("categoryIds", JSON.stringify([...selectedIds]));
-      form.set("newCategories", JSON.stringify(drafts.map((d) => ({ labelKr: d.labelKr, labelEn: d.labelEn }))));
-      form.set("pdf", pdfFile);
+      const urlRes = await adminFetch(token, "/api/admin/works/pdf-upload-url", { method: "POST" });
+      const urlData = await urlRes.json().catch(() => null);
+      if (!urlRes.ok) {
+        setError(urlData?.error ?? "업로드 URL 발급에 실패했습니다.");
+        return;
+      }
 
-      const res = await adminFetch(token, "/api/admin/works", { method: "POST", body: form });
+      const { error: uploadErr } = await supabaseBrowser.storage
+        .from(PDF_BUCKET)
+        .uploadToSignedUrl(urlData.path, urlData.token, pdfFile);
+      if (uploadErr) {
+        setError("PDF 업로드에 실패했습니다.");
+        return;
+      }
+
+      const drafts = draftCategories.filter((d) => selectedDraftIds.has(d.id));
+      const res = await adminFetch(token, "/api/admin/works", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titleKr,
+          titleEn,
+          year,
+          description,
+          ratio: ratio ?? 1,
+          pdfUrl: urlData.publicUrl,
+          categoryIds: [...selectedIds],
+          newCategories: drafts.map((d) => ({ labelKr: d.labelKr, labelEn: d.labelEn })),
+        }),
+      });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
         setError(data?.error ?? "작업물 저장에 실패했습니다.");
