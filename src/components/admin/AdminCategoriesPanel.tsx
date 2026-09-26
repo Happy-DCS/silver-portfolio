@@ -84,9 +84,6 @@ export default function AdminCategoriesPanel({
       <div className="admin-section-head">
         <h2>카테고리</h2>
         <span className="admin-count">{categories.length}</span>
-        <button type="button" className="admin-submit admin-list-btn admin-add-btn">
-          + 추가
-        </button>
       </div>
 
       <p className="admin-lineup-hint">아래 카테고리를 드래그해서 works 페이지 필터에 보일 묶음을 구성하세요.</p>
