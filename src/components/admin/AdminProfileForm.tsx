@@ -11,32 +11,13 @@ export default function AdminProfileForm({ profile, onSaved }: { profile: Profil
   const [instagramUrl, setInstagramUrl] = useState(profile.instagramUrl ?? "");
   const [behanceUrl, setBehanceUrl] = useState(profile.behanceUrl ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(profile.linkedinUrl ?? "");
-  const [resumeUrl, setResumeUrl] = useState(profile.resumeUrl ?? "");
-  const [resumeUploading, setResumeUploading] = useState(false);
-  const [resumeError, setResumeError] = useState<string | null>(null);
+  const resumeUrl = profile.resumeUrl ?? "";
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleResumeChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
-    e.target.value = "";
-    if (!file) return;
-
-    setResumeError(null);
-    setResumeUploading(true);
-    try {
-      const form = new FormData();
-      form.set("pdf", file);
-      const res = await adminFetch(token, "/api/admin/profile/resume", { method: "POST", body: form });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        setResumeError(data?.error ?? "업로드에 실패했습니다.");
-        return;
-      }
-      setResumeUrl(data.url);
-    } finally {
-      setResumeUploading(false);
-    }
+  function handleResumeChange(e: ChangeEvent<HTMLInputElement>) {
+    setResumeFile(e.target.files?.[0] ?? null);
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -44,6 +25,19 @@ export default function AdminProfileForm({ profile, onSaved }: { profile: Profil
     setError(null);
     setSubmitting(true);
     try {
+      let finalResumeUrl = resumeUrl.trim() || null;
+      if (resumeFile) {
+        const form = new FormData();
+        form.set("pdf", resumeFile);
+        const uploadRes = await adminFetch(token, "/api/admin/profile/resume", { method: "POST", body: form });
+        const uploadData = await uploadRes.json().catch(() => null);
+        if (!uploadRes.ok) {
+          setError(uploadData?.error ?? "이력서 업로드에 실패했습니다.");
+          return;
+        }
+        finalResumeUrl = uploadData.url;
+      }
+
       const res = await adminFetch(token, "/api/admin/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -52,7 +46,7 @@ export default function AdminProfileForm({ profile, onSaved }: { profile: Profil
           instagramUrl: instagramUrl.trim() || null,
           behanceUrl: behanceUrl.trim() || null,
           linkedinUrl: linkedinUrl.trim() || null,
-          resumeUrl: resumeUrl.trim() || null,
+          resumeUrl: finalResumeUrl,
         }),
       });
       const data = await res.json().catch(() => null);
@@ -97,15 +91,8 @@ export default function AdminProfileForm({ profile, onSaved }: { profile: Profil
       <div className="admin-field">
         <label htmlFor="profile-resume">이력서</label>
         <input id="profile-resume" value={resumeUrl} readOnly placeholder="등록된 이력서가 없습니다" />
-        <input
-          id="profile-resume-upload"
-          type="file"
-          accept="application/pdf"
-          onChange={handleResumeChange}
-          disabled={resumeUploading}
-        />
-        {resumeUploading && <p className="admin-field-hint">업로드 중…</p>}
-        {resumeError && <p className="admin-error">{resumeError}</p>}
+        <input id="profile-resume-upload" type="file" accept="application/pdf" onChange={handleResumeChange} />
+        {resumeFile && <p className="admin-field-hint">선택된 파일: {resumeFile.name} (저장 시 업로드됩니다)</p>}
       </div>
 
       {error && <p className="admin-error">{error}</p>}
