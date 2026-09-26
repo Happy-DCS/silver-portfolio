@@ -1,12 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import type { WorkListItem } from "@/lib/getWorks";
+import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
 import AdminLoginForm from "./AdminLoginForm";
 import AdminLogoutButton from "./AdminLogoutButton";
 import AdminWorksPanel from "./AdminWorksPanel";
 
-export default function AdminGate({ works }: { works: WorkListItem[] }) {
+export default function AdminGate({
+  works,
+  categories,
+  categoryGroups,
+}: {
+  works: WorkListItem[];
+  categories: AdminCategory[];
+  categoryGroups: AdminCategoryGroup[];
+}) {
   const [authed, setAuthed] = useState(false);
 
   if (!authed) {
@@ -22,7 +30,7 @@ export default function AdminGate({ works }: { works: WorkListItem[] }) {
         </div>
         <AdminLogoutButton onLogout={() => setAuthed(false)} />
       </div>
-      <AdminWorksPanel works={works} />
+      <AdminWorksPanel works={works} categories={categories} categoryGroups={categoryGroups} />
     </div>
   );
 }

@@ -1,11 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import type { WorkListItem } from "@/lib/getWorks";
+import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
+import AdminCategoriesPanel from "./AdminCategoriesPanel";
 
 const FEATURED_COUNT = 5;
 
-export default function AdminWorksPanel({ works: initialWorks }: { works: WorkListItem[] }) {
+export default function AdminWorksPanel({
+  works: initialWorks,
+  categories,
+  categoryGroups,
+}: {
+  works: WorkListItem[];
+  categories: AdminCategory[];
+  categoryGroups: AdminCategoryGroup[];
+}) {
   const [works, setWorks] = useState(initialWorks);
   const featured = works.slice(0, FEATURED_COUNT);
   const featuredIds = new Set(featured.map((w) => w.id));
@@ -38,6 +47,8 @@ export default function AdminWorksPanel({ works: initialWorks }: { works: WorkLi
           ))}
         </ul>
       </div>
+
+      <AdminCategoriesPanel categories={categories} categoryGroups={categoryGroups} />
 
       <div className="admin-section-block">
         <div className="admin-section-head">
