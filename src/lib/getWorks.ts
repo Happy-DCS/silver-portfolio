@@ -11,6 +11,7 @@ export type WorkListItem = {
   titleKr: string;
   titleEn: string;
   year: number;
+  description: string;
   categories: WorkCategory[];
   ratio: number;
   pdfUrl: string | null;
@@ -104,7 +105,7 @@ export async function getWorks(): Promise<WorkListItem[]> {
     getCategoryMap(),
     supabaseAdmin
       .from("works")
-      .select("id, title_kr, title_en, worked_at, category_ids, work_pdfs(ratio, pdf_url)")
+      .select("id, title_kr, title_en, worked_at, description, category_ids, work_pdfs(ratio, pdf_url)")
       .order("id"),
   ]);
 
@@ -118,6 +119,7 @@ export async function getWorks(): Promise<WorkListItem[]> {
       titleKr: w.title_kr,
       titleEn: w.title_en,
       year: w.worked_at,
+      description: w.description ?? "",
       categories: resolveCategories(w.category_ids, catMap),
       ratio: pdf?.ratio ?? 1,
       pdfUrl: pdf?.pdf_url ?? null,
