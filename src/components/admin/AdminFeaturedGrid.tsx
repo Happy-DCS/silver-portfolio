@@ -1,28 +1,41 @@
 "use client";
 
-import { useState, type MouseEvent } from "react";
+import { useState } from "react";
 import type { WorkListItem } from "@/lib/getWorks";
 import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
 import WorkThumbnail from "@/components/WorkThumbnail";
+import AdminCropPicker, { type CropArea } from "./AdminCropPicker";
 import AdminModal from "./AdminModal";
 
 const FEATURED_COUNT = 5;
 
-type FocalPoint = { x: number; y: number };
+// 홈페이지 collage(page.tsx의 COLLAGE)에서 각 슬롯이 실제로 쓰는 비율. 관리자 그리드 자체는
+// 단순 정사각형으로 통일했지만, 크롭을 정확히 잡으려면 모달 미리보기는 실제 랜딩페이지
+// 비율과 같아야 한다.
+const SLOT_RATIOS = ["r-169", "r-34", "r-1610", "r-34", "r-169"];
+const RATIO_VALUES: Record<string, number> = {
+  "r-169": 16 / 10,
+  "r-34": 3 / 4,
+  "r-1610": 16 / 9,
+};
+
+function centerFocalPoint(area: CropArea) {
+  return { x: area.x + area.width / 2, y: area.y + area.height / 2 };
+}
 
 export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) {
   const [slots, setSlots] = useState<(WorkListItem | null)[]>(() =>
     Array.from({ length: FEATURED_COUNT }, (_, i) => works[i] ?? null)
   );
-  const [focalPoints, setFocalPoints] = useState<Record<number, FocalPoint>>({});
+  const [cropAreas, setCropAreas] = useState<Record<number, CropArea>>({});
   const [pickerSlot, setPickerSlot] = useState<number | null>(null);
   const [pendingWorkId, setPendingWorkId] = useState<number | null>(null);
-  const [pendingFocal, setPendingFocal] = useState<FocalPoint>({ x: 50, y: 50 });
+  const [pendingArea, setPendingArea] = useState<CropArea | undefined>(undefined);
 
   function openPicker(index: number) {
     const existing = slots[index];
     setPendingWorkId(existing?.id ?? null);
-    setPendingFocal(existing ? focalPoints[existing.id] ?? { x: 50, y: 50 } : { x: 50, y: 50 });
+    setPendingArea(existing ? cropAreas[existing.id] : undefined);
     setPickerSlot(index);
   }
 
@@ -32,14 +45,7 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
 
   function handlePickWork(work: WorkListItem) {
     setPendingWorkId(work.id);
-    setPendingFocal(focalPoints[work.id] ?? { x: 50, y: 50 });
-  }
-
-  function handleFocalClick(e: MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
-    setPendingFocal({ x: Math.min(100, Math.max(0, x)), y: Math.min(100, Math.max(0, y)) });
+    setPendingArea(cropAreas[work.id]);
   }
 
   function handleConfirm() {
@@ -47,13 +53,14 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
     const work = works.find((w) => w.id === pendingWorkId) ?? null;
     const slotIndex = pickerSlot;
     setSlots((prev) => prev.map((s, i) => (i === slotIndex ? work : s)));
-    if (work) {
-      setFocalPoints((prev) => ({ ...prev, [work.id]: pendingFocal }));
+    if (work && pendingArea) {
+      setCropAreas((prev) => ({ ...prev, [work.id]: pendingArea }));
     }
     closePicker();
   }
 
   const pendingWork = works.find((w) => w.id === pendingWorkId) ?? null;
+  const pickerRatioClass = pickerSlot !== null ? SLOT_RATIOS[pickerSlot] : null;
 
   return (
     <>
@@ -67,7 +74,7 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
                   fallbackBg={categoryGradient(work.categories[0]?.slug)}
                   accentColor={categoryAccent(work.categories[0]?.slug)}
                   label={work.titleEn}
-                  focalPoint={focalPoints[work.id]}
+                  focalPoint={cropAreas[work.id] ? centerFocalPoint(cropAreas[work.id]) : undefined}
                 />
               </div>
             ) : (
@@ -96,19 +103,17 @@ export default function AdminFeaturedGrid({ works }: { works: WorkListItem[] }) 
             ))}
           </div>
 
-          {pendingWork && (
+          {pendingWork && pickerRatioClass && (
             <div className="admin-featured-focal">
-              <p className="admin-field-hint">이미지를 클릭해서 보여줄 위치(포컬 포인트)를 지정하세요.</p>
-              <div className="admin-featured-focal-preview" onClick={handleFocalClick}>
-                <WorkThumbnail
-                  pdfUrl={pendingWork.pdfUrl}
-                  fallbackBg={categoryGradient(pendingWork.categories[0]?.slug)}
-                  accentColor={categoryAccent(pendingWork.categories[0]?.slug)}
-                  label={pendingWork.titleEn}
-                  focalPoint={pendingFocal}
-                />
-                <span className="admin-focal-dot" style={{ left: `${pendingFocal.x}%`, top: `${pendingFocal.y}%` }} />
-              </div>
+              <p className="admin-field-hint">
+                왼쪽에서 드래그·스크롤로 원본 이미지를 조정하면, 오른쪽에 실제 랜딩페이지에 보일 모습이 나타납니다.
+              </p>
+              <AdminCropPicker
+                pdfUrl={pendingWork.pdfUrl}
+                aspect={RATIO_VALUES[pickerRatioClass]}
+                initialArea={cropAreas[pendingWork.id]}
+                onChange={setPendingArea}
+              />
             </div>
           )}
 
