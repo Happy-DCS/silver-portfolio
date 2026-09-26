@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createAdminToken } from "@/lib/adminAuth";
 
 export async function POST(request: Request) {
   const { username, password } = await request.json();
@@ -14,5 +15,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "아이디 또는 비밀번호가 올바르지 않습니다." }, { status: 401 });
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, token: createAdminToken() });
 }

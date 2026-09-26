@@ -2,6 +2,10 @@ import type { CSSProperties } from "react";
 import Footer from "@/components/Footer";
 import TopButton from "@/components/TopButton";
 import HomeHero from "@/components/HomeHero";
+import WorkThumbnail from "@/components/WorkThumbnail";
+import { categoryAccent, categoryGradient } from "@/lib/categoryColor";
+import { centerFocalPoint } from "@/lib/cropFocalPoint";
+import { getFeaturedSlots, type FeaturedSlot } from "@/lib/getWorks";
 
 // 320px(모바일 최소)~1340px(컨테이너 최대) 사이를 선형 보간해 마진을 유동적으로 줄인다.
 function fluidMargin(max: number, floor = Math.round(max * 0.3)) {
@@ -9,59 +13,22 @@ function fluidMargin(max: number, floor = Math.round(max * 0.3)) {
   return `clamp(${floor}px, calc(${floor}px + (100vw - 320px) * ${coeff.toFixed(5)}), ${max}px)`;
 }
 
-const COLLAGE = [
-  {
-    p: 1,
-    gridColumn: "1/7",
-    ratio: "r-169",
-    bg: "linear-gradient(135deg,#a0482c,#e8b64c)",
-    titleEn: "GGACHI COFFEE BAR",
-    titleKr: "까치커피바",
-    meta: "Branding · Web — 2026",
-  },
-  {
-    p: 2,
-    gridColumn: "9/13",
-    marginTop: 130,
-    ratio: "r-34",
-    bg: "linear-gradient(135deg,#2b3a67,#8ea7d9)",
-    titleEn: "Demian, Re-covered",
-    titleKr: "데미안 리커버",
-    meta: "Book Design — 2025",
-  },
-  {
-    p: 3,
-    gridColumn: "2/12",
-    marginTop: 170,
-    ratio: "r-1610",
-    bg: "linear-gradient(135deg,#2f7d43,#cfe3a8)",
-    titleEn: "Luck Foraging",
-    titleKr: "행운 채집 展",
-    meta: "Poster · Graphic — 2025",
-  },
-  {
-    p: 4,
-    gridColumn: "1/5",
-    marginTop: 170,
-    ratio: "r-34",
-    bg: "linear-gradient(135deg,#584a8f,#e3b8d5)",
-    titleEn: "Mitjul App",
-    titleKr: "밑줄",
-    meta: "UI/UX — 2024",
-  },
-  {
-    p: 6,
-    gridColumn: "6/12",
-    marginTop: 340,
-    ratio: "r-169",
-    bg: "linear-gradient(135deg,#c9541e,#f3d34a)",
-    titleEn: "SPROUT Exhibition",
-    titleKr: "SPROUT 전시 아이덴티티",
-    meta: "Branding — 2024",
-  },
+// featured_slots의 slot_index(0~4) 순서에 대응하는 콜라주 배치 정보.
+const COLLAGE_LAYOUT = [
+  { gridColumn: "1/7", ratio: "r-169" },
+  { gridColumn: "9/13", marginTop: 130, ratio: "r-34" },
+  { gridColumn: "2/12", marginTop: 170, ratio: "r-1610" },
+  { gridColumn: "1/5", marginTop: 170, ratio: "r-34" },
+  { gridColumn: "6/12", marginTop: 340, ratio: "r-169" },
 ];
 
-export default function Home() {
+type CollageItem = { layout: (typeof COLLAGE_LAYOUT)[number]; slot: FeaturedSlot | undefined };
+
+export default async function Home() {
+  const featuredSlots = await getFeaturedSlots();
+  const slots = [...featuredSlots].sort((a, b) => a.slotIndex - b.slotIndex);
+  const items: CollageItem[] = COLLAGE_LAYOUT.map((layout, i) => ({ layout, slot: slots[i] }));
+
   return (
     <>
       <HomeHero />
@@ -69,27 +36,42 @@ export default function Home() {
       <section id="works">
         <div className="container">
           <div className="collage">
-            {COLLAGE.map((item) => (
-              <a
-                key={item.p}
-                className="art"
-                style={
-                  {
-                    "--gc": item.gridColumn,
-                    "--mt": item.marginTop ? fluidMargin(item.marginTop) : "0px",
-                  } as CSSProperties
-                }
-                href={`/works/${item.p}`}
-              >
-                <div className={`ph ${item.ratio}`} style={{ background: item.bg }}>
-                  <em>{item.titleEn}</em>
-                </div>
-                <span className="lb">
-                  {item.titleKr}
-                  <i>{item.meta}</i>
-                </span>
-              </a>
-            ))}
+            {items.map(({ layout, slot }, i) => {
+              const work = slot?.work ?? null;
+              const style = {
+                "--gc": layout.gridColumn,
+                "--mt": layout.marginTop ? fluidMargin(layout.marginTop) : "0px",
+              } as CSSProperties;
+
+              if (!work) {
+                return (
+                  <div key={i} className="art art--empty" style={style}>
+                    <div className={`ph ${layout.ratio} ph-placeholder`} />
+                    <span className="lb">기대해주세요</span>
+                  </div>
+                );
+              }
+
+              return (
+                <a key={i} className="art" style={style} href={`/works/${work.id}`}>
+                  <div className={`ph ${layout.ratio}`}>
+                    <WorkThumbnail
+                      pdfUrl={work.pdfUrl}
+                      fallbackBg={categoryGradient(work.categories[0]?.slug)}
+                      accentColor={categoryAccent(work.categories[0]?.slug)}
+                      label={work.titleEn}
+                      focalPoint={slot?.crop ? centerFocalPoint(slot.crop) : undefined}
+                    />
+                  </div>
+                  <span className="lb">
+                    {work.titleKr}
+                    <i>
+                      {work.categories.map((c) => c.label).join(" · ")} — {work.year}
+                    </i>
+                  </span>
+                </a>
+              );
+            })}
           </div>
           <p className="col-more">
             <a href="/works">

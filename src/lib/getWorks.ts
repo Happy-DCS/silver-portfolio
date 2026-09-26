@@ -11,6 +11,7 @@ export type WorkListItem = {
   titleKr: string;
   titleEn: string;
   year: number;
+  description: string;
   categories: WorkCategory[];
   ratio: number;
   pdfUrl: string | null;
@@ -104,7 +105,7 @@ export async function getWorks(): Promise<WorkListItem[]> {
     getCategoryMap(),
     supabaseAdmin
       .from("works")
-      .select("id, title_kr, title_en, worked_at, category_ids, work_pdfs(ratio, pdf_url)")
+      .select("id, title_kr, title_en, worked_at, description, category_ids, work_pdfs(ratio, pdf_url)")
       .order("id"),
   ]);
 
@@ -118,11 +119,47 @@ export async function getWorks(): Promise<WorkListItem[]> {
       titleKr: w.title_kr,
       titleEn: w.title_en,
       year: w.worked_at,
+      description: w.description ?? "",
       categories: resolveCategories(w.category_ids, catMap),
       ratio: pdf?.ratio ?? 1,
       pdfUrl: pdf?.pdf_url ?? null,
     };
   });
+}
+
+export type CropArea = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type FeaturedSlot = {
+  slotIndex: number;
+  work: WorkListItem | null;
+  crop: CropArea | null;
+};
+
+export async function getFeaturedSlots(): Promise<FeaturedSlot[]> {
+  const [works, { data: slots, error }] = await Promise.all([
+    getWorks(),
+    supabaseAdmin
+      .from("featured_slots")
+      .select("slot_index, work_id, crop_x, crop_y, crop_width, crop_height")
+      .order("slot_index"),
+  ]);
+  if (error) throw error;
+
+  const workById = new Map(works.map((w) => [w.id, w]));
+
+  return (slots ?? []).map((s) => ({
+    slotIndex: s.slot_index,
+    work: s.work_id ? (workById.get(s.work_id) ?? null) : null,
+    crop:
+      s.crop_x !== null && s.crop_y !== null && s.crop_width !== null && s.crop_height !== null
+        ? { x: s.crop_x, y: s.crop_y, width: s.crop_width, height: s.crop_height }
+        : null,
+  }));
 }
 
 export type WorkDetail = {

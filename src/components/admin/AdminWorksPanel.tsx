@@ -1,38 +1,57 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
+import type { AdminCategory, AdminCategoryGroup, FeaturedSlot, WorkListItem } from "@/lib/getWorks";
 import AdminCategoriesPanel from "./AdminCategoriesPanel";
 import AdminFeaturedGrid from "./AdminFeaturedGrid";
 import AdminModal from "./AdminModal";
-import AdminWorkForm, { type NewWorkDraft } from "./AdminWorkForm";
+import AdminWorkEditForm from "./AdminWorkEditForm";
+import AdminWorkForm from "./AdminWorkForm";
 
-const FEATURED_COUNT = 5;
+function GearIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.5}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
 
 export default function AdminWorksPanel({
-  works: initialWorks,
+  works,
   categories,
   categoryGroups,
+  featuredSlots,
 }: {
   works: WorkListItem[];
   categories: AdminCategory[];
   categoryGroups: AdminCategoryGroup[];
+  featuredSlots: FeaturedSlot[];
 }) {
-  const [works, setWorks] = useState(initialWorks);
+  const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
-  const featured = works.slice(0, FEATURED_COUNT);
-  const featuredIds = new Set(featured.map((w) => w.id));
+  const [editingWork, setEditingWork] = useState<WorkListItem | null>(null);
+  const filledSlots = featuredSlots.filter((s) => s.work !== null);
+  const featuredIds = new Set(filledSlots.map((s) => s.work!.id));
 
-  function handleRemove(id: number) {
-    setWorks((prev) => prev.filter((w) => w.id !== id));
+  function handleCreated() {
+    setAddOpen(false);
+    router.refresh();
   }
 
-  function handleAddWork(draft: NewWorkDraft) {
-    setWorks((prev) => {
-      const tempId = Math.min(0, ...prev.map((w) => w.id)) - 1;
-      return [...prev, { id: tempId, ...draft }];
-    });
-    setAddOpen(false);
+  function handleWorkSaved() {
+    setEditingWork(null);
+    router.refresh();
+  }
+
+  function handleWorkDeleted() {
+    setEditingWork(null);
+    router.refresh();
   }
 
   return (
@@ -40,9 +59,9 @@ export default function AdminWorksPanel({
       <div className="admin-section-block">
         <div className="admin-section-head">
           <h2>대표 작업물</h2>
-          <span className="admin-count">{featured.length}</span>
+          <span className="admin-count">{filledSlots.length}</span>
         </div>
-        <AdminFeaturedGrid works={works} />
+        <AdminFeaturedGrid works={works} featuredSlots={featuredSlots} />
       </div>
 
       <AdminCategoriesPanel categories={categories} categoryGroups={categoryGroups} />
@@ -60,34 +79,42 @@ export default function AdminWorksPanel({
           </button>
         </div>
         <ul className="admin-list">
-          {works.map((w) => {
-            const locked = featuredIds.has(w.id);
-            return (
-              <li key={w.id} className="admin-list-row">
-                <span className="admin-list-main">
-                  <span className="admin-list-title">{w.titleKr}</span>
-                  <span className="admin-list-sub">
-                    {w.titleEn} · {w.year}
-                  </span>
+          {works.map((w) => (
+            <li key={w.id} className="admin-list-row">
+              <span className="admin-list-main">
+                <span className="admin-list-title">{w.titleKr}</span>
+                <span className="admin-list-sub">
+                  {w.titleEn} · {w.year}
                 </span>
-                <span className="admin-list-cat">{w.categories.map((c) => c.label).join(" · ")}</span>
-                <button
-                  type="button"
-                  className={locked ? "admin-remove-btn admin-remove-btn--locked" : "admin-remove-btn"}
-                  disabled={locked}
-                  onClick={locked ? undefined : () => handleRemove(w.id)}
-                  aria-label={locked ? "대표 작업물은 삭제할 수 없습니다" : "작업물 삭제"}
-                >
-                  −
-                </button>
-              </li>
-            );
-          })}
+              </span>
+              <span className="admin-list-cat">{w.categories.map((c) => c.label).join(" · ")}</span>
+              <button
+                type="button"
+                className="admin-edit-btn"
+                onClick={() => setEditingWork(w)}
+                aria-label="작업물 수정"
+              >
+                <GearIcon />
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
 
       <AdminModal open={addOpen} onClose={() => setAddOpen(false)} title="작업물 추가">
-        <AdminWorkForm categories={categories} onSubmit={handleAddWork} />
+        <AdminWorkForm categories={categories} onCreated={handleCreated} />
+      </AdminModal>
+
+      <AdminModal open={editingWork !== null} onClose={() => setEditingWork(null)} title="작업물 수정">
+        {editingWork && (
+          <AdminWorkEditForm
+            work={editingWork}
+            categories={categories}
+            locked={featuredIds.has(editingWork.id)}
+            onSaved={handleWorkSaved}
+            onDeleted={handleWorkDeleted}
+          />
+        )}
       </AdminModal>
     </section>
   );

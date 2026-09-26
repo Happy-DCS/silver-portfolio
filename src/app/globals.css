@@ -465,12 +465,6 @@ section {
   padding: 16px;
   transition: box-shadow 0.45s ease;
 }
-.art .ph em {
-  font-family: var(--serif-en);
-  font-style: italic;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.9);
-}
 .art .lb {
   position: absolute;
   left: 2px;
@@ -504,6 +498,14 @@ section {
 .art:hover .lb {
   opacity: 1;
   transform: none;
+}
+.ph-placeholder {
+  background: var(--line);
+}
+.art--empty .lb {
+  opacity: 1;
+  transform: none;
+  color: var(--muted);
 }
 .r-45 {
   aspect-ratio: 4 / 5;
@@ -1357,9 +1359,17 @@ main {
 }
 .admin-panel-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
+}
+.admin-panel-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .admin-eyebrow {
   font-size: clamp(10px, calc(10px + (100vw - 320px) * 0.001786), 12px);
@@ -1373,6 +1383,7 @@ main {
   font-size: clamp(26px, calc(26px + (100vw - 320px) * 0.02059), 40px);
   letter-spacing: -0.02em;
   margin-top: -4px;
+  white-space: nowrap;
 }
 .admin-desc {
   color: var(--muted);
@@ -1410,6 +1421,10 @@ main {
   font-size: 12.5px;
   color: var(--muted);
 }
+#work-description,
+#edit-work-description {
+  resize: none;
+}
 .admin-work-form {
   display: flex;
   flex-direction: column;
@@ -1444,6 +1459,7 @@ main {
 }
 .admin-category-add {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 }
@@ -1495,6 +1511,11 @@ main {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+.admin-featured-picker-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 .admin-featured-picker-list {
   display: flex;
@@ -1672,6 +1693,38 @@ main {
   justify-content: center;
   color: var(--ink);
 }
+.admin-edit-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.admin-edit-btn:hover {
+  background: var(--ink);
+  color: #fff;
+}
+.admin-work-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.admin-danger-btn {
+  color: #b3312c;
+  border-color: #b3312c;
+}
+.admin-danger-btn:hover:not(:disabled) {
+  background: #b3312c;
+  border-color: #b3312c;
+  color: #fff;
+}
 .admin-lineup-hint {
   font-size: 12.5px;
   color: var(--muted);
@@ -1682,6 +1735,11 @@ main {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
+  transition: opacity 0.15s ease;
+}
+.admin-lineup--pending {
+  opacity: 0.5;
+  pointer-events: none;
 }
 .admin-lineup-group {
   min-height: 44px;
@@ -1784,6 +1842,12 @@ main {
 }
 .admin-modal-close:hover {
   color: var(--ink);
+}
+.admin-modal-message {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-line;
 }
 @media (max-width: 575px) {
   .admin-modal-backdrop {

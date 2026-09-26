@@ -1,6 +1,9 @@
 import Image from "next/image";
+import { getProfile } from "@/lib/getProfile";
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const profile = await getProfile();
+
   return (
     <main>
       <div className="container">
@@ -12,34 +15,46 @@ export default function ContactPage() {
             <span className="l-kr">편하게 연락해 주세요</span>
           </span>
         </p>
-        <a className="mail" href="mailto:euncho.work@gmail.com">
-          euncho.work@gmail.com
-        </a>
+        {profile?.email && (
+          <a className="mail" href={`mailto:${profile.email}`}>
+            {profile.email}
+          </a>
+        )}
         <div className="c-sns">
-          <a className="ig" href="#" target="_blank" rel="noopener">
-            Instagram
-            <span className="igc">
-              <Image src="/assets/img/instagram.png" alt="" fill sizes="24px" />
-            </span>
-          </a>
-          <a className="be" href="#" target="_blank" rel="noopener">
-            Behance
-            <span className="igc">
-              <Image src="/assets/img/behance.png" alt="" fill sizes="24px" />
-            </span>
-          </a>
-          <div className="sns-row">
-            <a className="li" href="#" target="_blank" rel="noopener">
-              LinkedIn
+          {profile?.instagramUrl && (
+            <a className="ig" href={profile.instagramUrl} target="_blank" rel="noopener">
+              Instagram
               <span className="igc">
-                <Image src="/assets/img/linkedin.png" alt="" fill sizes="24px" />
+                <Image src="/assets/img/instagram.png" alt="" fill sizes="24px" />
               </span>
             </a>
-            <a className="rs" href="#">
-              <span className="r-en">Resume</span>
-              <span className="r-kr">이력서</span>
+          )}
+          {profile?.behanceUrl && (
+            <a className="be" href={profile.behanceUrl} target="_blank" rel="noopener">
+              Behance
+              <span className="igc">
+                <Image src="/assets/img/behance.png" alt="" fill sizes="24px" />
+              </span>
             </a>
-          </div>
+          )}
+          {(profile?.linkedinUrl || profile?.resumeUrl) && (
+            <div className="sns-row">
+              {profile?.linkedinUrl && (
+                <a className="li" href={profile.linkedinUrl} target="_blank" rel="noopener">
+                  LinkedIn
+                  <span className="igc">
+                    <Image src="/assets/img/linkedin.png" alt="" fill sizes="24px" />
+                  </span>
+                </a>
+              )}
+              {profile?.resumeUrl && (
+                <a className="rs" href={profile.resumeUrl} target="_blank" rel="noopener">
+                  <span className="r-en">Resume</span>
+                  <span className="r-kr">이력서</span>
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </main>

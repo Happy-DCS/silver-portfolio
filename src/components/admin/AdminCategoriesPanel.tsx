@@ -1,45 +1,47 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type DragEvent } from "react";
 import type { AdminCategory, AdminCategoryGroup } from "@/lib/getWorks";
-
-type LineupGroup = {
-  id: string;
-  categoryIds: number[];
-};
-
-let draftCounter = 0;
-function nextDraftId() {
-  draftCounter += 1;
-  return `draft-${draftCounter}`;
-}
+import { adminFetch } from "@/lib/adminFetch";
+import { useAdminToken } from "./AdminAuthContext";
+import AdminCategoryEditForm from "./AdminCategoryEditForm";
+import AdminModal from "./AdminModal";
 
 const DRAG_TYPE = "text/x-category-id";
 
 export default function AdminCategoriesPanel({
-  categories: initialCategories,
+  categories,
   categoryGroups,
 }: {
   categories: AdminCategory[];
   categoryGroups: AdminCategoryGroup[];
 }) {
-  const [categories, setCategories] = useState(initialCategories);
-  const [groups, setGroups] = useState<LineupGroup[]>(
-    categoryGroups.map((g) => ({ id: String(g.id), categoryIds: g.categoryIds }))
-  );
+  const router = useRouter();
+  const token = useAdminToken();
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [pending, setPending] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<AdminCategory | null>(null);
+  const [blockedDeleteMessage, setBlockedDeleteMessage] = useState<string | null>(null);
 
-  const groupedIds = new Set(groups.flatMap((g) => g.categoryIds));
+  const groupedIds = new Set(categoryGroups.flatMap((g) => g.categoryIds));
   const pool = categories.filter((c) => !groupedIds.has(c.id));
   const catById = new Map(categories.map((c) => [c.id, c]));
 
-  function handleRemoveCategory(id: number) {
-    setCategories((prev) => prev.filter((c) => c.id !== id));
-    setGroups((prev) =>
-      prev
-        .map((g) => ({ ...g, categoryIds: g.categoryIds.filter((cid) => cid !== id) }))
-        .filter((g) => g.categoryIds.length > 0)
-    );
+  async function handleRemoveCategory(id: number) {
+    setRemovingId(id);
+    try {
+      const res = await adminFetch(token, `/api/admin/categories/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        router.refresh();
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      setBlockedDeleteMessage(data?.error ?? "삭제에 실패했습니다.");
+    } finally {
+      setRemovingId(null);
+    }
   }
 
   function handleDragStart(e: DragEvent, id: number) {
@@ -53,30 +55,57 @@ export default function AdminCategoriesPanel({
     setDragOverId(zoneId);
   }
 
-  function handleDropOnGroup(e: DragEvent, groupId: string) {
+  async function handleDropOnGroup(e: DragEvent, group: AdminCategoryGroup) {
+    e.preventDefault();
+    setDragOverId(null);
+    const id = Number(e.dataTransfer.getData(DRAG_TYPE));
+    if (!id || group.categoryIds.includes(id)) return;
+
+    setPending(true);
+    try {
+      const res = await adminFetch(token, `/api/admin/category-groups/${group.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryIds: [...group.categoryIds, id] }),
+      });
+      if (res.ok) router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function handleDropNewGroup(e: DragEvent) {
     e.preventDefault();
     setDragOverId(null);
     const id = Number(e.dataTransfer.getData(DRAG_TYPE));
     if (!id) return;
-    setGroups((prev) =>
-      prev.map((g) => (g.id === groupId && !g.categoryIds.includes(id) ? { ...g, categoryIds: [...g.categoryIds, id] } : g))
-    );
+
+    setPending(true);
+    try {
+      const res = await adminFetch(token, "/api/admin/category-groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryIds: [id] }),
+      });
+      if (res.ok) router.refresh();
+    } finally {
+      setPending(false);
+    }
   }
 
-  function handleDropNewGroup(e: DragEvent) {
-    e.preventDefault();
-    setDragOverId(null);
-    const id = Number(e.dataTransfer.getData(DRAG_TYPE));
-    if (!id) return;
-    setGroups((prev) => [...prev, { id: nextDraftId(), categoryIds: [id] }]);
-  }
-
-  function handleRemoveFromGroup(groupId: string, categoryId: number) {
-    setGroups((prev) =>
-      prev
-        .map((g) => (g.id === groupId ? { ...g, categoryIds: g.categoryIds.filter((id) => id !== categoryId) } : g))
-        .filter((g) => g.categoryIds.length > 0)
-    );
+  async function handleRemoveFromGroup(group: AdminCategoryGroup, categoryId: number) {
+    setPending(true);
+    try {
+      const nextIds = group.categoryIds.filter((id) => id !== categoryId);
+      const res = await adminFetch(token, `/api/admin/category-groups/${group.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryIds: nextIds }),
+      });
+      if (res.ok) router.refresh();
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -87,14 +116,16 @@ export default function AdminCategoriesPanel({
       </div>
 
       <p className="admin-lineup-hint">아래 카테고리를 드래그해서 works 페이지 필터에 보일 묶음을 구성하세요.</p>
-      <div className="admin-lineup">
-        {groups.map((g) => (
+      <div className={pending ? "admin-lineup admin-lineup--pending" : "admin-lineup"}>
+        {categoryGroups.map((g) => (
           <div
             key={g.id}
-            className={dragOverId === g.id ? "admin-lineup-group admin-lineup-group--over" : "admin-lineup-group"}
-            onDragOver={(e) => handleDragOver(e, g.id)}
-            onDragLeave={() => setDragOverId((prev) => (prev === g.id ? null : prev))}
-            onDrop={(e) => handleDropOnGroup(e, g.id)}
+            className={
+              dragOverId === String(g.id) ? "admin-lineup-group admin-lineup-group--over" : "admin-lineup-group"
+            }
+            onDragOver={(e) => handleDragOver(e, String(g.id))}
+            onDragLeave={() => setDragOverId((prev) => (prev === String(g.id) ? null : prev))}
+            onDrop={(e) => handleDropOnGroup(e, g)}
           >
             {g.categoryIds.map((id) => {
               const cat = catById.get(id);
@@ -104,7 +135,7 @@ export default function AdminCategoriesPanel({
                   {cat.labelKr}
                   <button
                     type="button"
-                    onClick={() => handleRemoveFromGroup(g.id, id)}
+                    onClick={() => handleRemoveFromGroup(g, id)}
                     aria-label={`${cat.labelKr} 그룹에서 제거`}
                   >
                     ×
@@ -131,12 +162,17 @@ export default function AdminCategoriesPanel({
               <span className="admin-list-title">{c.labelKr}</span>
               <span className="admin-list-sub">{c.labelEn}</span>
             </span>
-            <button type="button" className="admin-submit admin-list-btn">
+            <button
+              type="button"
+              className="admin-submit admin-list-btn"
+              onClick={() => setEditingCategory(c)}
+            >
               수정
             </button>
             <button
               type="button"
               className="admin-remove-btn"
+              disabled={removingId === c.id}
               onClick={() => handleRemoveCategory(c.id)}
               aria-label="카테고리 삭제"
             >
@@ -145,6 +181,26 @@ export default function AdminCategoriesPanel({
           </li>
         ))}
       </ul>
+
+      <AdminModal open={editingCategory !== null} onClose={() => setEditingCategory(null)} title="카테고리 수정">
+        {editingCategory && (
+          <AdminCategoryEditForm
+            category={editingCategory}
+            onSaved={() => {
+              setEditingCategory(null);
+              router.refresh();
+            }}
+          />
+        )}
+      </AdminModal>
+
+      <AdminModal
+        open={blockedDeleteMessage !== null}
+        onClose={() => setBlockedDeleteMessage(null)}
+        title="삭제할 수 없습니다"
+      >
+        <p className="admin-modal-message">{blockedDeleteMessage}</p>
+      </AdminModal>
     </div>
   );
 }
