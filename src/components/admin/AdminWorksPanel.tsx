@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { AdminCategory, AdminCategoryGroup, WorkListItem } from "@/lib/getWorks";
 import AdminCategoriesPanel from "./AdminCategoriesPanel";
+import AdminModal from "./AdminModal";
+import AdminWorkForm, { type NewWorkDraft } from "./AdminWorkForm";
 
 const FEATURED_COUNT = 5;
 
@@ -16,11 +18,20 @@ export default function AdminWorksPanel({
   categoryGroups: AdminCategoryGroup[];
 }) {
   const [works, setWorks] = useState(initialWorks);
+  const [addOpen, setAddOpen] = useState(false);
   const featured = works.slice(0, FEATURED_COUNT);
   const featuredIds = new Set(featured.map((w) => w.id));
 
   function handleRemove(id: number) {
     setWorks((prev) => prev.filter((w) => w.id !== id));
+  }
+
+  function handleAddWork(draft: NewWorkDraft) {
+    setWorks((prev) => {
+      const tempId = Math.min(0, ...prev.map((w) => w.id)) - 1;
+      return [...prev, { id: tempId, ...draft }];
+    });
+    setAddOpen(false);
   }
 
   return (
@@ -54,7 +65,11 @@ export default function AdminWorksPanel({
         <div className="admin-section-head">
           <h2>모든 작업물</h2>
           <span className="admin-count">{works.length}</span>
-          <button type="button" className="admin-submit admin-list-btn admin-add-btn">
+          <button
+            type="button"
+            className="admin-submit admin-list-btn admin-add-btn"
+            onClick={() => setAddOpen(true)}
+          >
             + 추가
           </button>
         </div>
@@ -84,6 +99,10 @@ export default function AdminWorksPanel({
           })}
         </ul>
       </div>
+
+      <AdminModal open={addOpen} onClose={() => setAddOpen(false)} title="작업물 추가">
+        <AdminWorkForm categories={categories} onSubmit={handleAddWork} />
+      </AdminModal>
     </section>
   );
 }
