@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { requireAdminToken } from "@/lib/adminAuth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
+const BUCKET = "work-pdfs";
+
+function extractObjectPath(pdfUrl: string): string | null {
+  const marker = `/object/public/${BUCKET}/`;
+  const idx = pdfUrl.indexOf(marker);
+  if (idx === -1) return null;
+  return pdfUrl.slice(idx + marker.length).split("?")[0];
+}
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const unauthorized = requireAdminToken(request);
   if (unauthorized) return unauthorized;
@@ -34,9 +43,20 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { id } = await params;
   const workId = Number(id);
 
+  const { data: pdfRow } = await supabaseAdmin
+    .from("work_pdfs")
+    .select("pdf_url")
+    .eq("work_id", workId)
+    .maybeSingle();
+
   await supabaseAdmin.from("work_pdfs").delete().eq("work_id", workId);
   const { error } = await supabaseAdmin.from("works").delete().eq("id", workId);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const objectPath = pdfRow?.pdf_url ? extractObjectPath(pdfRow.pdf_url) : null;
+  if (objectPath) {
+    await supabaseAdmin.storage.from(BUCKET).remove([objectPath]);
+  }
 
   return NextResponse.json({ ok: true });
 }
