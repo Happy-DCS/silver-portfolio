@@ -106,7 +106,8 @@ export async function getWorks(): Promise<WorkListItem[]> {
     supabaseAdmin
       .from("works")
       .select("id, title_kr, title_en, worked_at, description, category_ids, work_pdfs(ratio, pdf_url)")
-      .order("id"),
+      .order("worked_at", { ascending: false })
+      .order("id", { ascending: false }),
   ]);
 
   const { data, error } = worksResult;
